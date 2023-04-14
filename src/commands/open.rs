@@ -2,6 +2,7 @@ mod embeds;
 use std::str::FromStr;
 
 use serenity::{
+    builder::CreateInteractionResponse,
     model::{
         prelude::{
             interaction::message_component::MessageComponentInteraction, ChannelId,
@@ -13,6 +14,7 @@ use serenity::{
 };
 
 use crate::config::{self, SecretType};
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum TicketType {
     Character,
@@ -50,6 +52,26 @@ impl TicketType {
         }
         .to_string()
     }
+}
+
+pub async fn open_modal(
+    ctx: &Context,
+    command: &MessageComponentInteraction,
+    ticket_type: TicketType,
+) {
+    command
+        .create_interaction_response(
+            &ctx.http,
+            |f: CreateInteractionResponse| match ticket_type {
+                TicketType::Dm => self::embeds::dm::get_modal(&mut f),
+                TicketType::Sheetcheck => self::embeds::sheetcheck::get_modal(&mut f),
+                TicketType::Shopkeep => self::embeds::shopkeep::get_modal(&mut f),
+                TicketType::Staff => self::embeds::staff::get_modal(&mut f),
+                _ => unreachable!(),
+            },
+        )
+        .await
+        .unwrap()
 }
 
 pub async fn run(

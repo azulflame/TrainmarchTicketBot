@@ -41,10 +41,11 @@ impl EventHandler for Handler {
                     TicketType::Character => {
                         commands::open::run(&ctx, &command, TicketType::Character).await
                     }
-                    TicketType::Dm => commands::open::run(&ctx, &command, TicketType::Dm).await,
                     TicketType::Respec => {
                         commands::open::run(&ctx, &command, TicketType::Respec).await
                     }
+                    TicketType::Dm => commands::open::run(&ctx, &command, TicketType::Dm).await,
+
                     TicketType::Shopkeep => {
                         commands::open::run(&ctx, &command, TicketType::Shopkeep).await
                     }
