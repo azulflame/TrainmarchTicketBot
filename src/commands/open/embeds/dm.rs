@@ -1,5 +1,7 @@
 use serenity::{
-    builder::{CreateComponents, CreateEmbed, CreateInteractionResponse},
+    builder::{
+        CreateComponents, CreateEmbed, CreateInteractionResponse, CreateInteractionResponseData,
+    },
     model::prelude::interaction::InteractionResponseType,
 };
 
@@ -56,13 +58,10 @@ static DM_QUESTIONS: [DmQuestions; 5] = [
 ];
 
 pub fn get_modal<'a>(
-    z: &'a mut CreateInteractionResponse<'a>,
-) -> &'a mut CreateInteractionResponse<'a> {
-    z.kind(InteractionResponseType::Modal)
-        .interaction_response_data(|f| {
-            f.custom_id("dm_modal_submit")
-                .components(|c: &mut CreateComponents| {
-                    c.create_action_row(|r| super::build_rows(r, &DM_QUESTIONS))
-                })
+    f: &'a mut CreateInteractionResponseData<'a>,
+) -> &'a mut CreateInteractionResponseData<'a> {
+    f.custom_id("dm_modal_submit")
+        .components(|c: &mut CreateComponents| {
+            c.create_action_row(|r| super::build_rows(r, &DM_QUESTIONS))
         })
 }

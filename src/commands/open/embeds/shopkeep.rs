@@ -52,7 +52,7 @@ pub fn get_modal<'a>(
 ) -> &'a mut CreateInteractionResponse<'a> {
     z.kind(InteractionResponseType::Modal)
         .interaction_response_data(|f| {
-            f.custom_id("dm_modal_submit")
+            f.custom_id("shopkeep_modal_submit")
                 .components(|c: &mut CreateComponents| {
                     c.create_action_row(|row| super::build_rows(row, &SHOPKEEP_QUESTIONS))
                 })

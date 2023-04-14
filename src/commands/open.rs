@@ -5,8 +5,10 @@ use serenity::{
     builder::CreateInteractionResponse,
     model::{
         prelude::{
-            interaction::message_component::MessageComponentInteraction, ChannelId,
-            PermissionOverwrite, PermissionOverwriteType, RoleId,
+            interaction::{
+                message_component::MessageComponentInteraction, InteractionResponseType,
+            },
+            ChannelId, PermissionOverwrite, PermissionOverwriteType, RoleId,
         },
         Permissions,
     },
@@ -59,19 +61,13 @@ pub async fn open_modal(
     command: &MessageComponentInteraction,
     ticket_type: TicketType,
 ) {
-    command
-        .create_interaction_response(
-            &ctx.http,
-            |f: CreateInteractionResponse| match ticket_type {
-                TicketType::Dm => self::embeds::dm::get_modal(&mut f),
-                TicketType::Sheetcheck => self::embeds::sheetcheck::get_modal(&mut f),
-                TicketType::Shopkeep => self::embeds::shopkeep::get_modal(&mut f),
-                TicketType::Staff => self::embeds::staff::get_modal(&mut f),
-                _ => unreachable!(),
-            },
-        )
-        .await
-        .unwrap()
+    match ticket_type {
+        TicketType::Dm => self::embeds::dm::get_modal(&command),
+        TicketType::Sheetcheck => self::embeds::sheetcheck::get_modal(&command),
+        TicketType::Shopkeep => self::embeds::shopkeep::get_modal(&command),
+        TicketType::Staff => self::embeds::staff::get_modal(&command),
+        _ => unreachable!(),
+    }
 }
 
 pub async fn run(
