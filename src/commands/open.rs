@@ -161,6 +161,8 @@ pub async fn create_ticket_from_modal(
 
     let author_id = submission.user.id.0;
 
+    let guild_id = submission.guild_id.unwrap().0;
+
     let staff_role = config::get_config_val(config::SecretType::Staff)
         .parse::<u64>()
         .map_err(|_| "Unable to parse the retrieved Staff role ID into u64".to_string())?;
@@ -174,6 +176,11 @@ pub async fn create_ticket_from_modal(
         .map_err(|_| "Unable to parse the retrieved category ID".to_string())?;
 
     let perms = vec![
+        PermissionOverwrite {
+            allow: Permissions::empty(),
+            deny: Permissions::VIEW_CHANNEL,
+            kind: PermissionOverwriteType::Role(RoleId(guild_id)),
+        },
         PermissionOverwrite {
             allow: Permissions::VIEW_CHANNEL,
             deny: Permissions::empty(),
