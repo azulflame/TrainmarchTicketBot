@@ -26,10 +26,10 @@ impl super::Questions for LoreQuestions {
     }
     fn get_id(&self) -> &str {
         match &self {
-            LoreQuestions::Age => "dm_modal_age",
-            LoreQuestions::ServerTime => "dm_modal_servertime",
-            LoreQuestions::Vouch => "dm_modal_vouch",
-            LoreQuestions::Why => "dm_modal_why",
+            LoreQuestions::Age => "lore_modal_age",
+            LoreQuestions::ServerTime => "lore_modal_servertime",
+            LoreQuestions::Vouch => "lore_modal_vouch",
+            LoreQuestions::Why => "lore_modal_why",
             LoreQuestions::Story => "lore_modal_story",
         }
     }
