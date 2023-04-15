@@ -21,7 +21,7 @@ impl super::Questions for LoreQuestions {
             LoreQuestions::ServerTime => "How long have you been on the server?",
             LoreQuestions::Vouch => "Who on the server can vouch for you?",
             LoreQuestions::Why => "Why do you want to be on the Lore Team?",
-            LoreQuestions::Story => "Tell me why the chicken crossed the road.",
+            LoreQuestions::Story => "Tell me a short story about a chicken.",
         }
     }
     fn get_id(&self) -> &str {
