@@ -9,18 +9,20 @@ This is a custom ticketing bot for the Trainmarch discord server. It is built an
 * Staff Application
 * Shopkeep Application
 * Sheet Checker Application
+* Lore Team Application
 
 ## Secrets
 Secrets are managed using shuttle-secrets. Required fields:
-* `DISCORD_TOKEN` The discord bot token
-* `GUILD_ID` The guild ID the bot will be used in
-* `CATEGORY_ID` The category to spawn new tickets in
-* `LOG_CHANNEL` The channel to put the message logs in on ticket closure
-* `SHOPKEEP` The role to ping when opening a shopkeep ticket
-* `SHEETCHECK` The role to ping when opening a new sheetcheck ticket
-* `CHARACTER` The role to ping when opening a character application
-* `RESPEC` The role to ping when opening a character application
+* `DISCORD_TOKEN` The discord bot token.
+* `CATEGORY_ID` The category to spawn new tickets in.
+* `LOG_CHANNEL` The channel to put the message logs in on ticket closure.
+* `SHEETCHECK` The role to ping when opening a new sheetcheck ticket.
+* `CHARACTER` The role to ping when opening a character application.
+* `SHOPKEEP` The role to ping when opening a shopkeep ticket.
+* `GUILD_ID` The guild ID the bot will be used in.
+* `RESPEC` The role to ping when opening a character application.
 * `STAFF` The role to ping when opening a Staff applicaiton. This role can see all tickets.
+* `LORE` The role to ping when opening a Lore Team application.
 * `DM` The role to ping when opening a DM ticket.
 
 ## Building and Running
