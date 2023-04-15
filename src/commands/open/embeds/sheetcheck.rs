@@ -67,9 +67,9 @@ impl Questions for SheetcheckQuestions {
     }
     fn get_id(&self) -> &str {
         match &self {
-            SheetcheckQuestions::Age => "dm_modal_age",
-            SheetcheckQuestions::ServerTime => "dm_modal_servertime",
-            SheetcheckQuestions::Why => "dm_modal_why",
+            SheetcheckQuestions::Age => "sheetcheck_modal_age",
+            SheetcheckQuestions::ServerTime => "sheetcheck_modal_servertime",
+            SheetcheckQuestions::Why => "sheetcheck_modal_why",
         }
     }
     fn required(&self) -> bool {
