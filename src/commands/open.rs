@@ -268,6 +268,12 @@ pub async fn run(
 
     let author_id = command.user.id.0;
 
+    let guild_id = command.guild_id.unwrap().0;
+
+    let bot_role = config::get_config_val(config::SecretType::BotRole)
+        .parse::<u64>()
+        .map_err(|_| "Unable to parse the retrieved Staff role ID into u64".to_string())?;
+
     let staff_role = config::get_config_val(config::SecretType::Staff)
         .parse::<u64>()
         .map_err(|_| "Unable to parse the retrieved Staff role ID into u64".to_string())?;
@@ -281,6 +287,16 @@ pub async fn run(
         .map_err(|_| "Unable to parse the retrieved category ID".to_string())?;
 
     let perms = vec![
+        PermissionOverwrite {
+            allow: Permissions::VIEW_CHANNEL,
+            deny: Permissions::empty(),
+            kind: PermissionOverwriteType::Role(RoleId(bot_role)),
+        },
+        PermissionOverwrite {
+            allow: Permissions::empty(),
+            deny: Permissions::VIEW_CHANNEL,
+            kind: PermissionOverwriteType::Role(RoleId(guild_id)),
+        },
         PermissionOverwrite {
             allow: Permissions::VIEW_CHANNEL,
             deny: Permissions::empty(),
