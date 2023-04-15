@@ -1,13 +1,11 @@
-use serenity::{
-    builder::{CreateComponents, CreateEmbed, CreateInteractionResponse},
-    model::prelude::interaction::InteractionResponseType,
-};
+use serenity::{builder::CreateEmbed, model::prelude::component::InputTextStyle};
 
 pub fn embed(embed: &mut CreateEmbed) -> &mut CreateEmbed {
-    embed
-    .title("Thanks for the Staff Application")
-    .field("A Few Questions", "How old are you?\nHow much experience do you have moderating?\nHow long have you been on the server?\nWhy do you want to become a mod?", false)
-    .field("", "Please answer the questons above, then the admins will get back to you when we have the time.", false)
+    embed.title("Thanks for the Staff Application").field(
+        "Your ticket has been created.",
+        "We have received your application. We will review it when we have time.",
+        false,
+    )
 }
 pub enum StaffQuestions {
     Age,
@@ -41,23 +39,19 @@ impl super::Questions for StaffQuestions {
             StaffQuestions::Why => true,
         }
     }
+    fn style(&self) -> InputTextStyle {
+        match self {
+            StaffQuestions::Age => InputTextStyle::Short,
+            StaffQuestions::Experience => InputTextStyle::Paragraph,
+            StaffQuestions::ServerTime => InputTextStyle::Paragraph,
+            StaffQuestions::Why => InputTextStyle::Paragraph,
+        }
+    }
 }
 
-const STAFF_QUESTIONS: [StaffQuestions; 4] = [
+pub const STAFF_QUESTIONS: [StaffQuestions; 4] = [
     StaffQuestions::Age,
     StaffQuestions::Experience,
     StaffQuestions::ServerTime,
     StaffQuestions::Why,
 ];
-
-pub fn get_modal<'a>(
-    z: &'a mut CreateInteractionResponse<'a>,
-) -> &'a mut CreateInteractionResponse<'a> {
-    z.kind(InteractionResponseType::Modal)
-        .interaction_response_data(|f| {
-            f.custom_id("staff_modal_submit")
-                .components(|c: &mut CreateComponents| {
-                    c.create_action_row(|row| super::build_rows(row, &STAFF_QUESTIONS))
-                })
-        })
-}

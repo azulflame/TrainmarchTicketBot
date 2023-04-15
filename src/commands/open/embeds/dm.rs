@@ -1,15 +1,9 @@
-use serenity::{
-    builder::{
-        CreateComponents, CreateEmbed, CreateInteractionResponse, CreateInteractionResponseData,
-    },
-    model::prelude::interaction::InteractionResponseType,
-};
+use serenity::{builder::CreateEmbed, model::prelude::component::InputTextStyle};
 
 pub fn embed(embed: &mut CreateEmbed) -> &mut CreateEmbed {
     embed
         .title("Thanks for the DM Application")
-        .field("Please answer these:", "What is your age (optional)?\nHow much experience do you have as a DM?\nHow much time/experience on the server?\nWho on the server can vouch for you?\nWhy do you want to become a DM?", false)
-        .field("What Now?", "After you answer the questions, the queen bitch will get back to you. They will review your answers and may go forward with your interview.", false)
+        .field("Your application has been created.", "The Head DM will review your answers and may go forward with the process when they have time.", false)
 }
 
 pub enum DmQuestions {
@@ -48,20 +42,20 @@ impl super::Questions for DmQuestions {
             DmQuestions::Why => true,
         }
     }
+    fn style(&self) -> InputTextStyle {
+        match self {
+            DmQuestions::Age => InputTextStyle::Short,
+            DmQuestions::Experience => InputTextStyle::Paragraph,
+            DmQuestions::Vouch => InputTextStyle::Paragraph,
+            DmQuestions::ServerTime => InputTextStyle::Paragraph,
+            DmQuestions::Why => InputTextStyle::Paragraph,
+        }
+    }
 }
-static DM_QUESTIONS: [DmQuestions; 5] = [
+pub const DM_QUESTIONS: [DmQuestions; 5] = [
     DmQuestions::Age,
     DmQuestions::Experience,
     DmQuestions::ServerTime,
     DmQuestions::Vouch,
     DmQuestions::Why,
 ];
-
-pub fn get_modal<'a>(
-    f: &'a mut CreateInteractionResponseData<'a>,
-) -> &'a mut CreateInteractionResponseData<'a> {
-    f.custom_id("dm_modal_submit")
-        .components(|c: &mut CreateComponents| {
-            c.create_action_row(|r| super::build_rows(r, &DM_QUESTIONS))
-        })
-}

@@ -36,6 +36,7 @@ pub async fn run(ctx: &Context, command: &ApplicationCommandInteraction) -> Resu
                 .add_button(CreateButton::default().custom_id("create_shopkeep_ticket").label("Shopkeep Application").style(ButtonStyle::Primary).to_owned())
                 .add_button(CreateButton::default().custom_id("create_sheetcheck_ticket").label("Sheetchecker Application").style(ButtonStyle::Primary).to_owned())
                 .add_button(CreateButton::default().custom_id("create_staff_ticket").label("Staff Application").style(ButtonStyle::Primary).to_owned())
+                .add_button(CreateButton::default().custom_id("create_lore_ticket").label("Lore Team Application").style(ButtonStyle::Primary).to_owned())
             })
         })
     }).await.map_err(|_| "And error was encountered creating the Server embed".to_string())?;

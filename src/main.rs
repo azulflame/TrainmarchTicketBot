@@ -1,17 +1,18 @@
-#[deny(rust_2018_idioms)]
 mod commands;
 mod config;
-use std::str::FromStr;
-
+use serenity::model::prelude::interaction::InteractionResponseType::DeferredUpdateMessage;
 use serenity::{
     async_trait,
     model::prelude::{interaction::Interaction, GuildId, Ready},
     prelude::{Context, EventHandler, GatewayIntents},
     Client,
 };
+use std::str::FromStr;
 
 use commands::open::TicketType;
 use shuttle_secrets::SecretStore;
+
+use crate::commands::open::open_modal;
 struct Handler;
 #[derive(Eq, PartialEq)]
 enum CommandType {
@@ -35,47 +36,49 @@ impl EventHandler for Handler {
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
         // Message button interaction
         if let Interaction::MessageComponent(command) = interaction.clone() {
-            command.defer(&ctx.http).await.unwrap();
             if let Ok(ticket_type) = TicketType::from_str(&command.data.custom_id) {
-                println!("ticket type: {:#?}", ticket_type);
                 let response = match ticket_type {
+                    // Directly open a ticket
                     TicketType::Character => {
+                        command.defer(&ctx.http).await.unwrap();
                         commands::open::run(&ctx, &command, TicketType::Character).await
                     }
-                    TicketType::Dm => commands::open::run(&ctx, &command, TicketType::Dm).await,
                     TicketType::Respec => {
+                        command.defer(&ctx.http).await.unwrap();
                         commands::open::run(&ctx, &command, TicketType::Respec).await
                     }
-                    TicketType::Shopkeep => {
-                        commands::open::run(&ctx, &command, TicketType::Shopkeep).await
-                    }
-                    TicketType::Sheetcheck => {
-                        commands::open::run(&ctx, &command, TicketType::Sheetcheck).await
-                    }
-                    TicketType::Staff => {
-                        commands::open::run(&ctx, &command, TicketType::Staff).await
-                    }
+                    // Open a modal
+                    TicketType::Dm
+                    | TicketType::Sheetcheck
+                    | TicketType::Shopkeep
+                    | TicketType::Staff
+                    | TicketType::Lore => open_modal(&ctx, &command, ticket_type).await,
                 };
-                match match response {
-                    Ok(x) => {
-                        command
-                            .create_followup_message(&ctx.http, |f| {
-                                f.content(format!("Your ticket has been created at <#{}>", x))
+                if ticket_type == TicketType::Character || ticket_type == TicketType::Respec {
+                    match match response {
+                        Ok(x) => {
+                            command
+                                .create_followup_message(&ctx.http, |f| {
+                                    f.content(format!("Your ticket has been created at <#{}>", x))
+                                        .ephemeral(true)
+                                })
+                                .await
+                        }
+                        Err(x) => {
+                            command
+                                .create_followup_message(&ctx.http, |f| {
+                                    f.content(format!(
+                                        "There was an error opening your ticket: {}",
+                                        x
+                                    ))
                                     .ephemeral(true)
-                            })
-                            .await
+                                })
+                                .await
+                        }
+                    } {
+                        Ok(_) => {}
+                        Err(e) => println!("{:#?}", e),
                     }
-                    Err(x) => {
-                        command
-                            .create_followup_message(&ctx.http, |f| {
-                                f.content(format!("There was an error opening your ticket: {}", x))
-                                    .ephemeral(true)
-                            })
-                            .await
-                    }
-                } {
-                    Ok(_) => {}
-                    Err(e) => println!("{:#?}", e),
                 }
             }
         }
@@ -92,25 +95,62 @@ impl EventHandler for Handler {
                 };
 
                 let _x = match response {
-                    Ok(_) if command_type != CommandType::Close => {
-                        command
-                            .create_followup_message(&ctx.http, |f| {
-                                f.content("Your ticket has been closed").ephemeral(true)
-                            })
-                            .await.is_ok()
-                    }
-                    Ok(_) => {
-                        command.create_interaction_response(&ctx.http, |f| f.kind(serenity::model::prelude::interaction::InteractionResponseType::DeferredUpdateMessage)).await.is_ok()
-                    }
-                    Err(x) => {
-                        command
-                            .create_followup_message(&ctx.http, |f| {
-                                f.content(format!("There was an error opening your ticket: {}", x))
-                                    .ephemeral(true)
-                            })
-                            .await.is_ok()
-                    }
+                    Ok(_) if command_type != CommandType::Close => command
+                        .create_followup_message(&ctx.http, |f| {
+                            f.content("Created").ephemeral(true)
+                        })
+                        .await
+                        .is_ok(),
+                    Ok(_) => command
+                        .create_interaction_response(&ctx.http, |f| f.kind(DeferredUpdateMessage))
+                        .await
+                        .is_ok(),
+                    Err(x) => command
+                        .create_followup_message(&ctx.http, |f| {
+                            f.content(format!("There was an error opening your ticket: {}", x))
+                                .ephemeral(true)
+                        })
+                        .await
+                        .is_ok(),
                 };
+            }
+        }
+
+        // Modal submission
+        if let Interaction::ModalSubmit(submission) = interaction.clone() {
+            let mut result: Result<String, String> = Ok("".to_string());
+            if submission.data.custom_id == TicketType::Dm.get_modal_id() {
+                result = commands::open::create_ticket_from_modal(&ctx, &submission, TicketType::Dm)
+                    .await
+            } else if submission.data.custom_id == TicketType::Sheetcheck.get_modal_id() {
+                result = commands::open::create_ticket_from_modal(
+                    &ctx,
+                    &submission,
+                    TicketType::Sheetcheck,
+                )
+                .await
+            } else if submission.data.custom_id == TicketType::Staff.get_modal_id() {
+                result =
+                    commands::open::create_ticket_from_modal(&ctx, &submission, TicketType::Staff)
+                        .await
+            } else if submission.data.custom_id == TicketType::Shopkeep.get_modal_id() {
+                result = commands::open::create_ticket_from_modal(
+                    &ctx,
+                    &submission,
+                    TicketType::Shopkeep,
+                )
+                .await
+            } else if submission.data.custom_id == TicketType::Lore.get_modal_id() {
+                result =
+                    commands::open::create_ticket_from_modal(&ctx, &submission, TicketType::Lore)
+                        .await
+            }
+            match result {
+                Ok(_) => submission
+                    .create_interaction_response(&ctx.http, |f| f.kind(DeferredUpdateMessage))
+                    .await
+                    .unwrap(),
+                Err(x) => println!("{:#?}", x),
             }
         }
     }

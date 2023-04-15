@@ -1,8 +1,5 @@
 use rand::seq::SliceRandom;
-use serenity::{
-    builder::{CreateComponents, CreateEmbed, CreateInteractionResponse},
-    model::prelude::interaction::InteractionResponseType,
-};
+use serenity::{builder::CreateEmbed, model::prelude::component::InputTextStyle};
 
 use super::Questions;
 const GSHEETS: &[&str] = &["https://docs.google.com/spreadsheets/d/1Yj-nmFw86gp2zh3cLqvJ5SEoBZ_hR7UJsSol2s2NdFk/edit?usp=drivesdk",
@@ -21,12 +18,38 @@ const DICECLOUD: &[&str] = &[
 
 pub fn embed(embed: &mut CreateEmbed) -> &mut CreateEmbed {
     embed
-    .title("Thanks for the Sheetchecker Application")
-    .field("A Few Questions", "What is your age (optional)?\nHow much time have you spent on the server?\nWhat is your incentive for sheet checking?", false)
-    .field("", "Please answer the questons above, then we will have you check a few sheets.", false)
-    .field("Sheet 1", GSHEETS.choose(&mut rand::thread_rng()).as_ref().unwrap().to_string(), false)
-    .field("Sheet 2", DDB.choose(&mut rand::thread_rng()).as_ref().unwrap().to_string(), false)
-    .field("Sheet 3", DICECLOUD.choose(&mut rand::thread_rng()).as_ref().unwrap().to_string(), false)
+        .title("Thanks for the Sheetchecker Application")
+        .field(
+            "Sample Sheets",
+            "Please do your best to find the problems with these sample sheets, and the Head of Sheets will get to you when you finish.",
+            false,
+        )
+        .field(
+            "Sheet 1",
+            GSHEETS
+                .choose(&mut rand::thread_rng())
+                .as_ref()
+                .unwrap()
+                .to_string(),
+            false,
+        )
+        .field(
+            "Sheet 2",
+            DDB.choose(&mut rand::thread_rng())
+                .as_ref()
+                .unwrap()
+                .to_string(),
+            false,
+        )
+        .field(
+            "Sheet 3",
+            DICECLOUD
+                .choose(&mut rand::thread_rng())
+                .as_ref()
+                .unwrap()
+                .to_string(),
+            false,
+        )
 }
 pub enum SheetcheckQuestions {
     Age,
@@ -56,21 +79,16 @@ impl Questions for SheetcheckQuestions {
             SheetcheckQuestions::Why => true,
         }
     }
+    fn style(&self) -> InputTextStyle {
+        match &self {
+            SheetcheckQuestions::Age => InputTextStyle::Short,
+            SheetcheckQuestions::ServerTime => InputTextStyle::Paragraph,
+            SheetcheckQuestions::Why => InputTextStyle::Paragraph,
+        }
+    }
 }
-const SHEETCHECK_QUESTIONS: [SheetcheckQuestions; 3] = [
+pub const SHEETCHECK_QUESTIONS: [SheetcheckQuestions; 3] = [
     SheetcheckQuestions::Age,
     SheetcheckQuestions::ServerTime,
     SheetcheckQuestions::Why,
 ];
-
-pub fn get_modal<'a>(
-    z: &'a mut CreateInteractionResponse<'a>,
-) -> &'a mut CreateInteractionResponse<'a> {
-    z.kind(InteractionResponseType::Modal)
-        .interaction_response_data(|f| {
-            f.custom_id("sheetcheck_modal_submit")
-                .components(|c: &mut CreateComponents| {
-                    c.create_action_row(|r| super::build_rows(r, &SHEETCHECK_QUESTIONS))
-                })
-        })
-}
