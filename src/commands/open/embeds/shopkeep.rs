@@ -1,9 +1,52 @@
-use serenity::builder::CreateEmbed;
+use serenity::{builder::CreateEmbed, model::prelude::component::InputTextStyle};
+
+use super::Questions;
 
 pub fn embed(embed: &mut CreateEmbed) -> &mut CreateEmbed {
-    embed
-    .title("Thanks for your Shopkeep Application!")
-    .field("Which Shop?", "Which shop did you want to be a shopkeep for? The Black Market, the Bazaar, or the Trade Market?", false)
-    .field("Which Character", "Although it doesn't really matter too much, which character (or NPC) did you want to be a shopkeep", false)
-    .field("Someone wants an item when I'm in a quest", "If you're the only shopkeep around and someone wants to buy an item while you're in a quest, you may RP out a brief selling interaction while in the quest. Your DM may not penalize you for this.", false)
+    embed.title("Thanks for your Shopkeep Application!").field(
+        "Your application has been created!",
+        "A Shopkeep Overseer will review this, and may have further questions for you.",
+        false,
+    )
 }
+pub enum ShopkeepQuestions {
+    Shop,
+    Character,
+    Why,
+}
+
+impl Questions for ShopkeepQuestions {
+    fn get_question(&self) -> &str {
+        match &self {
+            ShopkeepQuestions::Shop => "Which shop do you want to be a shopkeep for?",
+            ShopkeepQuestions::Why => "Why do you want to be a shopkeep?",
+            ShopkeepQuestions::Character => "What PC/NPC will you be a shopkeep with?",
+        }
+    }
+    fn get_id(&self) -> &str {
+        match &self {
+            ShopkeepQuestions::Shop => "shopkeep_modal_shop",
+            ShopkeepQuestions::Why => "shopkeep_modal_why",
+            ShopkeepQuestions::Character => "shopkeep_modal_character",
+        }
+    }
+    fn required(&self) -> bool {
+        match self {
+            ShopkeepQuestions::Shop => true,
+            ShopkeepQuestions::Character => true,
+            ShopkeepQuestions::Why => true,
+        }
+    }
+    fn style(&self) -> InputTextStyle {
+        match &self {
+            ShopkeepQuestions::Shop => InputTextStyle::Short,
+            ShopkeepQuestions::Character => InputTextStyle::Short,
+            ShopkeepQuestions::Why => InputTextStyle::Paragraph,
+        }
+    }
+}
+pub const SHOPKEEP_QUESTIONS: [ShopkeepQuestions; 3] = [
+    ShopkeepQuestions::Shop,
+    ShopkeepQuestions::Character,
+    ShopkeepQuestions::Why,
+];

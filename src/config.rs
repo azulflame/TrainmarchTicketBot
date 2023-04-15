@@ -17,6 +17,7 @@ pub enum SecretType {
     GuildId,
     Respec,
     Staff,
+    Lore,
     Dm,
 }
 
@@ -32,6 +33,7 @@ impl SecretType {
             SecretType::GuildId => "GUILD_ID",
             SecretType::Respec => "RESPEC",
             SecretType::Staff => "STAFF",
+            SecretType::Lore => "LORE",
             SecretType::Dm => "DM",
         }
         .to_string()
@@ -46,6 +48,7 @@ impl From<TicketType> for SecretType {
             TicketType::Sheetcheck => SecretType::Sheetcheck,
             TicketType::Shopkeep => SecretType::Shopkeep,
             TicketType::Staff => SecretType::Staff,
+            TicketType::Lore => SecretType::Lore,
         }
     }
 }

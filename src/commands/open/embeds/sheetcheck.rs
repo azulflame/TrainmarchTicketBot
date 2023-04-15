@@ -1,5 +1,7 @@
 use rand::seq::SliceRandom;
-use serenity::builder::CreateEmbed;
+use serenity::{builder::CreateEmbed, model::prelude::component::InputTextStyle};
+
+use super::Questions;
 const GSHEETS: &[&str] = &["https://docs.google.com/spreadsheets/d/1Yj-nmFw86gp2zh3cLqvJ5SEoBZ_hR7UJsSol2s2NdFk/edit?usp=drivesdk",
 "https://docs.google.com/spreadsheets/d/14MOQ-dtfVn5ua9z5ypfe0T1TnB-u-eitONIDwWhfW-c/edit?usp=drivesdk",
 "https://docs.google.com/spreadsheets/d/1zpHxzrpfX3wUbNr06fOkVyLbL6BAqX5lH-wDQAqLQfQ/edit?usp=drivesdk"];
@@ -16,10 +18,77 @@ const DICECLOUD: &[&str] = &[
 
 pub fn embed(embed: &mut CreateEmbed) -> &mut CreateEmbed {
     embed
-    .title("Thanks for the Sheetchecker Application")
-    .field("A Few Questions", "What is your age (optional)?\nHow much time have you spent on the server?\nWhat is your incentive for sheet checking?", false)
-    .field("", "Please answer the questons above, then we will have you check a few sheets.", false)
-    .field("Sheet 1", GSHEETS.choose(&mut rand::thread_rng()).as_ref().unwrap().to_string(), false)
-    .field("Sheet 2", DDB.choose(&mut rand::thread_rng()).as_ref().unwrap().to_string(), false)
-    .field("Sheet 3", DICECLOUD.choose(&mut rand::thread_rng()).as_ref().unwrap().to_string(), false)
+        .title("Thanks for the Sheetchecker Application")
+        .field(
+            "Sample Sheets",
+            "Please do your best to find the problems with these sample sheets, and the Head of Sheets will get to you when you finish.",
+            false,
+        )
+        .field(
+            "Sheet 1",
+            GSHEETS
+                .choose(&mut rand::thread_rng())
+                .as_ref()
+                .unwrap()
+                .to_string(),
+            false,
+        )
+        .field(
+            "Sheet 2",
+            DDB.choose(&mut rand::thread_rng())
+                .as_ref()
+                .unwrap()
+                .to_string(),
+            false,
+        )
+        .field(
+            "Sheet 3",
+            DICECLOUD
+                .choose(&mut rand::thread_rng())
+                .as_ref()
+                .unwrap()
+                .to_string(),
+            false,
+        )
 }
+pub enum SheetcheckQuestions {
+    Age,
+    ServerTime,
+    Why,
+}
+
+impl Questions for SheetcheckQuestions {
+    fn get_question(&self) -> &str {
+        match &self {
+            SheetcheckQuestions::Age => "What is your age?",
+            SheetcheckQuestions::ServerTime => "How long have you been on the server?",
+            SheetcheckQuestions::Why => "Why do you want to be a Sheetchecker?",
+        }
+    }
+    fn get_id(&self) -> &str {
+        match &self {
+            SheetcheckQuestions::Age => "dm_modal_age",
+            SheetcheckQuestions::ServerTime => "dm_modal_servertime",
+            SheetcheckQuestions::Why => "dm_modal_why",
+        }
+    }
+    fn required(&self) -> bool {
+        match &self {
+            SheetcheckQuestions::Age => false,
+            SheetcheckQuestions::ServerTime => true,
+            SheetcheckQuestions::Why => true,
+        }
+    }
+    fn style(&self) -> InputTextStyle {
+        match &self {
+            SheetcheckQuestions::Age => InputTextStyle::Short,
+            SheetcheckQuestions::ServerTime => InputTextStyle::Paragraph,
+            SheetcheckQuestions::Why => InputTextStyle::Paragraph,
+        }
+    }
+}
+pub const SHEETCHECK_QUESTIONS: [SheetcheckQuestions; 3] = [
+    SheetcheckQuestions::Age,
+    SheetcheckQuestions::ServerTime,
+    SheetcheckQuestions::Why,
+];
