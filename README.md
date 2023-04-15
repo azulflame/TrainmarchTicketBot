@@ -19,6 +19,7 @@ Secrets are managed using shuttle-secrets. Required fields:
 * `SHEETCHECK` The role to ping when opening a new sheetcheck ticket.
 * `CHARACTER` The role to ping when opening a character application.
 * `SHOPKEEP` The role to ping when opening a shopkeep ticket.
+* `BOT_ROLE` The role the bot is assigned.
 * `GUILD_ID` The guild ID the bot will be used in.
 * `RESPEC` The role to ping when opening a character application.
 * `STAFF` The role to ping when opening a Staff applicaiton. This role can see all tickets.
