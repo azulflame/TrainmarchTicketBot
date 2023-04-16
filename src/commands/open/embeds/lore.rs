@@ -4,6 +4,7 @@ pub fn embed(embed: &mut CreateEmbed) -> &mut CreateEmbed {
     embed
         .title("Thanks for the Lore Team Application")
         .field("Your application has been created.", "The Lore Team will review your answers and may go forward with the process when they have time.", false)
+        .field("Short Story", "In this ticket, write me a short story about a chicken that crossed the road. Minimum 5 sentences.", false)
 }
 
 pub enum LoreQuestions {
@@ -11,7 +12,6 @@ pub enum LoreQuestions {
     ServerTime,
     Vouch,
     Why,
-    Story,
 }
 
 impl super::Questions for LoreQuestions {
@@ -21,7 +21,6 @@ impl super::Questions for LoreQuestions {
             LoreQuestions::ServerTime => "How long have you been on the server?",
             LoreQuestions::Vouch => "Who on the server can vouch for you?",
             LoreQuestions::Why => "Why do you want to be on the Lore Team?",
-            LoreQuestions::Story => "Tell me a short story about a chicken.",
         }
     }
     fn get_id(&self) -> &str {
@@ -30,13 +29,11 @@ impl super::Questions for LoreQuestions {
             LoreQuestions::ServerTime => "lore_modal_servertime",
             LoreQuestions::Vouch => "lore_modal_vouch",
             LoreQuestions::Why => "lore_modal_why",
-            LoreQuestions::Story => "lore_modal_story",
         }
     }
     fn required(&self) -> bool {
         match &self {
             LoreQuestions::Age => false,
-            LoreQuestions::Story => true,
             LoreQuestions::ServerTime => true,
             LoreQuestions::Vouch => true,
             LoreQuestions::Why => true,
@@ -45,17 +42,15 @@ impl super::Questions for LoreQuestions {
     fn style(&self) -> InputTextStyle {
         match self {
             LoreQuestions::Age => InputTextStyle::Short,
-            LoreQuestions::Story => InputTextStyle::Paragraph,
             LoreQuestions::Vouch => InputTextStyle::Paragraph,
             LoreQuestions::ServerTime => InputTextStyle::Paragraph,
             LoreQuestions::Why => InputTextStyle::Paragraph,
         }
     }
 }
-pub const LORE_QUESTIONS: [LoreQuestions; 5] = [
+pub const LORE_QUESTIONS: [LoreQuestions; 4] = [
     LoreQuestions::Age,
     LoreQuestions::ServerTime,
     LoreQuestions::Vouch,
     LoreQuestions::Why,
-    LoreQuestions::Story,
 ];

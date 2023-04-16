@@ -91,7 +91,6 @@ pub fn get_question_from_id(id: &str) -> String {
         _ if id == StaffQuestions::ServerTime.get_id() => StaffQuestions::ServerTime.get_question(),
         _ if id == LoreQuestions::Age.get_id() => LoreQuestions::Age.get_question(),
         _ if id == LoreQuestions::ServerTime.get_id() => LoreQuestions::ServerTime.get_question(),
-        _ if id == LoreQuestions::Story.get_id() => LoreQuestions::Story.get_question(),
         _ if id == LoreQuestions::Vouch.get_id() => LoreQuestions::Vouch.get_question(),
         _ if id == LoreQuestions::Why.get_id() => LoreQuestions::Why.get_question(),
         _ => panic!(),
