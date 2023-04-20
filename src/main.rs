@@ -118,40 +118,24 @@ impl EventHandler for Handler {
 
         // Modal submission
         if let Interaction::ModalSubmit(submission) = interaction.clone() {
-            let mut result: Result<String, String> = Ok("".to_string());
-            if submission.data.custom_id == TicketType::Dm.get_modal_id() {
-                result = commands::open::create_ticket_from_modal(&ctx, &submission, TicketType::Dm)
-                    .await
-            } else if submission.data.custom_id == TicketType::Sheetcheck.get_modal_id() {
-                result = commands::open::create_ticket_from_modal(
-                    &ctx,
-                    &submission,
-                    TicketType::Sheetcheck,
-                )
+            submission.defer(&ctx.http).await.unwrap();
+            println!("{}", submission.data.custom_id);
+            let message = match match TicketType::from_str(submission.data.custom_id.as_str()) {
+                Err(_) => Err(
+                    "Unable to identify which ticket was used. Please contact Azulflame".to_owned(),
+                ),
+                Ok(ticket_type) => {
+                    commands::open::create_ticket_from_modal(&ctx, &submission, ticket_type).await
+                }
+            } {
+                Ok(x) => format!("Your ticket has been opened at <#{}>", x),
+
+                Err(x) => format!("There was an error opening your ticket: {}", x),
+            };
+            submission
+                .create_followup_message(&ctx.http, |f| f.content(message).ephemeral(true))
                 .await
-            } else if submission.data.custom_id == TicketType::Staff.get_modal_id() {
-                result =
-                    commands::open::create_ticket_from_modal(&ctx, &submission, TicketType::Staff)
-                        .await
-            } else if submission.data.custom_id == TicketType::Shopkeep.get_modal_id() {
-                result = commands::open::create_ticket_from_modal(
-                    &ctx,
-                    &submission,
-                    TicketType::Shopkeep,
-                )
-                .await
-            } else if submission.data.custom_id == TicketType::Lore.get_modal_id() {
-                result =
-                    commands::open::create_ticket_from_modal(&ctx, &submission, TicketType::Lore)
-                        .await
-            }
-            match result {
-                Ok(_) => submission
-                    .create_interaction_response(&ctx.http, |f| f.kind(DeferredUpdateMessage))
-                    .await
-                    .unwrap(),
-                Err(x) => println!("{:#?}", x),
-            }
+                .unwrap();
         }
     }
 
