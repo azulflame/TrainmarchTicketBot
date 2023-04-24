@@ -6,6 +6,7 @@ pub fn embed(embed: &mut CreateEmbed) -> &mut CreateEmbed {
         .field("Your application has been created.", "The Head DM will review your answers and may go forward with the process when they have time.", false)
 }
 
+#[derive(Clone, Copy)]
 pub enum DmQuestions {
     Age,
     Experience,

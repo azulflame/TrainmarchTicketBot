@@ -7,6 +7,7 @@ pub fn embed(embed: &mut CreateEmbed) -> &mut CreateEmbed {
         .field("Short Story", "In this ticket, write me a short story about a chicken that crossed the road. Minimum 5 sentences.", false)
 }
 
+#[derive(Clone, Copy)]
 pub enum LoreQuestions {
     Age,
     ServerTime,

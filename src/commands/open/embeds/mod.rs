@@ -8,7 +8,7 @@ use serenity::{
 
 use self::{
     dm::DmQuestions, lore::LoreQuestions, sheetcheck::SheetcheckQuestions,
-    shopkeep::ShopkeepQuestions, staff::StaffQuestions,
+    shopkeep::ShopkeepQuestions, staff::StaffQuestions, homebrew::HomebrewQuestions,
 };
 
 pub mod character;
@@ -18,6 +18,7 @@ pub mod respec;
 pub mod sheetcheck;
 pub mod shopkeep;
 pub mod staff;
+pub mod homebrew;
 
 pub trait Questions {
     fn get_question(&self) -> &str {
@@ -93,6 +94,10 @@ pub fn get_question_from_id(id: &str) -> String {
         _ if id == LoreQuestions::ServerTime.get_id() => LoreQuestions::ServerTime.get_question(),
         _ if id == LoreQuestions::Vouch.get_id() => LoreQuestions::Vouch.get_question(),
         _ if id == LoreQuestions::Why.get_id() => LoreQuestions::Why.get_question(),
+        _ if id == HomebrewQuestions::Why.get_id() => HomebrewQuestions::Why.get_question(),
+        _ if id == HomebrewQuestions::Experience.get_id() => HomebrewQuestions::Experience.get_question(),
+        _ if id == HomebrewQuestions::Balance.get_id() => HomebrewQuestions::Balance.get_question(),
+        _ if id == HomebrewQuestions::Time.get_id() => HomebrewQuestions::Time.get_question(),
         _ => panic!(),
     };
     question.to_owned().to_string()

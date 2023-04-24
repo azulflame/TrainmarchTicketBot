@@ -23,25 +23,45 @@ pub async fn run(ctx: &Context, command: &ApplicationCommandInteraction) -> Resu
             })
         })
         .await.map_err(|_| "And error was encountered creating the Character embed".to_string())?;
-    command.channel_id.send_message(&ctx.http, |message_builder| {
-        message_builder.embed(|embed_builder| {
-            embed_builder.title("Server Applications")
-            .title("Server Applications")
-            .field("Open an Application", "Click the button below to open an application. Instructions Each ticket will have instructions and questions inside of the ticket after you open it.", false)
-        })
-        .components(|c| {
-            c.create_action_row(|r|
-            {
-                r.add_button(CreateButton::default().custom_id("create_dm_ticket").label("DM Application").style(ButtonStyle::Primary).to_owned())
-                .add_button(CreateButton::default().custom_id("create_shopkeep_ticket").label("Shopkeep Application").style(ButtonStyle::Primary).to_owned())
-                .add_button(CreateButton::default().custom_id("create_sheetcheck_ticket").label("Sheetchecker Application").style(ButtonStyle::Primary).to_owned())
-                .add_button(CreateButton::default().custom_id("create_staff_ticket").label("Staff Application").style(ButtonStyle::Primary).to_owned())
-                .add_button(CreateButton::default().custom_id("create_lore_ticket").label("Lore Team Application").style(ButtonStyle::Primary).to_owned())
-            })
-        })
-    }).await.map_err(|_| "And error was encountered creating the Server embed".to_string())?;
 
-    Ok("Embeds Created!".to_string())
+        command
+            .channel_id
+            .send_message(&ctx.http, |message_builder| {
+                message_builder
+                    .embed(|embed_builder| {
+                        embed_builder
+                            .title("Server Applications")
+                            .field("Open a Server Application", "These applications are for the roles that aid the server to run. Each ticket will have ", false)
+                    })
+                .components(|c| {
+                    c.create_action_row(|r|
+                                        {
+                                            r.add_button(CreateButton::default().custom_id("create_dm_ticket").label("DM Application").style(ButtonStyle::Primary).to_owned())
+                                                .add_button(CreateButton::default().custom_id("create_homebrew_ticket").label("Homebrew Application").style(ButtonStyle::Primary).to_owned())
+                                                .add_button(CreateButton::default().custom_id("create_shopkeep_ticket").label("Shopkeep Application").style(ButtonStyle::Primary).to_owned())
+                                                .add_button(CreateButton::default().custom_id("create_sheetcheck_ticket").label("Sheetchecker Application").style(ButtonStyle::Primary).to_owned())
+                                        }
+                                       )
+                })
+            }).await.map_err(|_|"An error was encountered creating the Server Applications embed".to_string())?;
+
+        command.channel_id.send_message(&ctx.http, |message_builder| {
+            message_builder.embed(|embed_builder| {
+                embed_builder.title("Server Applications")
+                    .title("Server Management Applications")
+                    .field("Open an Application", "These tickets are for the roles that manage the server.", false)
+                    .field("Instructions", "Each ticket will have instructions and questions inside of the ticket after you open it.", false)
+            })
+            .components(|c| {
+                c.create_action_row(|r|
+                                    {
+                                        r.add_button(CreateButton::default().custom_id("create_staff_ticket").label("Staff Application").style(ButtonStyle::Primary).to_owned())
+                                            .add_button(CreateButton::default().custom_id("create_lore_ticket").label("Lore Team Application").style(ButtonStyle::Primary).to_owned())
+                                    })
+            })
+        }).await.map_err(|_| "And error was encountered creating the Server Management embed".to_string())?;
+
+        Ok("Embeds Created!".to_string())
 }
 
 pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {

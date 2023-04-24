@@ -19,7 +19,7 @@ use serenity::{
 
 use crate::config::{self, SecretType};
 
-use self::embeds::{dm, get_question_from_id, lore, send_modal, sheetcheck, shopkeep, staff};
+use self::embeds::{dm, get_question_from_id, lore, send_modal, sheetcheck, shopkeep, staff, homebrew};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct Question {
@@ -36,6 +36,7 @@ pub enum TicketType {
     Shopkeep,
     Staff,
     Lore,
+    Homebrew,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -60,11 +61,13 @@ impl FromStr for TicketType {
             "create_shopkeep_ticket" => Ok(TicketType::Shopkeep),
             "create_staff_ticket" => Ok(TicketType::Staff),
             "create_lore_ticket" => Ok(TicketType::Lore),
+            "create_homebrew_ticket" => Ok(TicketType::Homebrew),
             "lore_ticket_modal" => Ok(TicketType::Lore),
             "dm_ticket_modal" => Ok(TicketType::Dm),
             "sheetcheck_ticket_modal" => Ok(TicketType::Sheetcheck),
             "shopkeep_ticket_modal" => Ok(TicketType::Shopkeep),
             "staff_ticket_modal" => Ok(TicketType::Staff),
+            "homebrew_ticket_modal" => Ok(TicketType::Homebrew),
             _ => Err(()),
         }
     }
@@ -80,6 +83,7 @@ impl TicketType {
             TicketType::Shopkeep => "shopkeep",
             TicketType::Staff => "staff",
             TicketType::Lore => "lore",
+            TicketType::Homebrew => "homebrew"
         }
         .to_string()
     }
@@ -91,6 +95,7 @@ impl TicketType {
             TicketType::Shopkeep => "shopkeep_ticket_modal",
             TicketType::Staff => "staff_ticket_modal",
             TicketType::Lore => "lore_ticket_modal",
+            TicketType::Homebrew => "homebrew_ticket_modal",
         }
     }
     pub fn get_title(&self) -> String {
@@ -102,6 +107,7 @@ impl TicketType {
             TicketType::Shopkeep => "Shopkeep Application",
             TicketType::Staff => "Staff Application",
             TicketType::Lore => "Lore Team Application",
+            TicketType::Homebrew => "Homebrew Team Application",
         }
         .to_string()
     }
@@ -114,6 +120,7 @@ impl TicketType {
             TicketType::Shopkeep => embeds::shopkeep::embed(e),
             TicketType::Staff => embeds::staff::embed(e),
             TicketType::Lore => embeds::lore::embed(e),
+            TicketType::Homebrew => embeds::homebrew::embed(e)
         }
     }
 }
@@ -170,6 +177,16 @@ pub async fn open_modal(
                 &ctx,
                 &command,
                 shopkeep::SHOPKEEP_QUESTIONS.as_ref(),
+                ticket_type.get_title(),
+            )
+            .await
+        }
+        TicketType::Homebrew => {
+            send_modal(
+                ticket_type.get_modal_id().to_string(),
+                &ctx,
+                &command,
+                homebrew::HOMEBREW_QUESTIONS.as_ref(),
                 ticket_type.get_title(),
             )
             .await

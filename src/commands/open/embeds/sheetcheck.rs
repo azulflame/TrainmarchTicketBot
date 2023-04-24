@@ -51,6 +51,7 @@ pub fn embed(embed: &mut CreateEmbed) -> &mut CreateEmbed {
             false,
         )
 }
+#[derive(Clone, Copy)]
 pub enum SheetcheckQuestions {
     Age,
     ServerTime,
