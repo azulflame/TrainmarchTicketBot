@@ -76,8 +76,6 @@ pub async fn run(ctx: &Context, command: &ApplicationCommandInteraction) -> Resu
 
     // pull logs
 
-    println!("Pulling logs");
-
     let messages = command
         .channel_id
         .messages(&ctx.http, |retriever| retriever.limit(100))
@@ -90,8 +88,6 @@ pub async fn run(ctx: &Context, command: &ApplicationCommandInteraction) -> Resu
         })?;
 
     // Delete the channel
-
-    println!("Deleting Channel");
 
     let deleted_channel = &command
         .channel_id
@@ -122,7 +118,6 @@ pub async fn run(ctx: &Context, command: &ApplicationCommandInteraction) -> Resu
         })
         .await
         .map_err(|_| "Error posting log message to the log channel".to_string())?;
-    println!("Log message sent");
 
     fs::remove_file(filename).map_err(|_| "Unable to delete the log file.")?;
 

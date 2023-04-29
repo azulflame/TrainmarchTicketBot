@@ -50,9 +50,9 @@ impl super::Questions for StaffQuestions {
     }
 }
 
-pub const STAFF_QUESTIONS: [StaffQuestions; 4] = [
-    StaffQuestions::Age,
-    StaffQuestions::Experience,
-    StaffQuestions::ServerTime,
-    StaffQuestions::Why,
-];
+pub fn get_questions() -> Vec<Box<dyn super::Questions + Send + Sync>> { vec![
+    Box::from(StaffQuestions::Age),
+    Box::from(StaffQuestions::Experience),
+    Box::from(StaffQuestions::ServerTime),
+    Box::from(StaffQuestions::Why),
+]}

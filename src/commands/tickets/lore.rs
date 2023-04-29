@@ -49,9 +49,9 @@ impl super::Questions for LoreQuestions {
         }
     }
 }
-pub const LORE_QUESTIONS: [LoreQuestions; 4] = [
-    LoreQuestions::Age,
-    LoreQuestions::ServerTime,
-    LoreQuestions::Vouch,
-    LoreQuestions::Why,
-];
+pub fn get_questions() -> Vec<Box<dyn super::Questions + Send + Sync>> { vec![
+    Box::from(LoreQuestions::Age),
+    Box::from(LoreQuestions::ServerTime),
+    Box::from(LoreQuestions::Vouch),
+    Box::from(LoreQuestions::Why),
+]}

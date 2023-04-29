@@ -53,10 +53,12 @@ impl super::Questions for DmQuestions {
         }
     }
 }
-pub const DM_QUESTIONS: [DmQuestions; 5] = [
-    DmQuestions::Age,
-    DmQuestions::Experience,
-    DmQuestions::ServerTime,
-    DmQuestions::Vouch,
-    DmQuestions::Why,
-];
+
+pub fn get_questions() -> Vec<Box<dyn super::Questions + Send + Sync>> {
+    vec![Box::from(DmQuestions::Age),
+    Box::from(DmQuestions::Experience),
+    Box::from(DmQuestions::ServerTime),
+    Box::from(DmQuestions::Vouch),
+    Box::from(DmQuestions::Why),
+    ]
+}

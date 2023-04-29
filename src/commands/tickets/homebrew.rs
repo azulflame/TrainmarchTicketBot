@@ -52,9 +52,11 @@ impl Questions for HomebrewQuestions {
         }
     }
 }
-pub const HOMEBREW_QUESTIONS: [HomebrewQuestions; 4] = [
-    HomebrewQuestions::Why,
-    HomebrewQuestions::Experience,
-    HomebrewQuestions::Balance,
-    HomebrewQuestions::Time,
-];
+pub fn get_questions() -> Vec<Box<dyn super::Questions + Send + Sync>> { vec![
+    Box::from(HomebrewQuestions::Why),
+    Box::from(HomebrewQuestions::Experience),
+    Box::from(HomebrewQuestions::Balance),
+    Box::from(HomebrewQuestions::Time),
+]
+}
+
