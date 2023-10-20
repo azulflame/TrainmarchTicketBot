@@ -35,11 +35,12 @@ pub trait Questions {
     }
 }
 
+
 pub async fn send_modal(
     id: String,
     ctx: &Context,
     interaction: &MessageComponentInteraction,
-    questions: &[impl Questions],
+    questions: &Vec<Box<impl Questions + ? Sized>>,
     title: String,
 ) {
     let x = interaction
@@ -50,11 +51,11 @@ pub async fn send_modal(
                         questions.iter().clone().fold(c, |c, val| {
                             c.create_action_row(|row| {
                                 row.create_input_text(|t| {
-                                    t.custom_id(val.get_id())
+                                    t.custom_id((*val).get_id())
                                         .max_length(800)
-                                        .label(val.get_question())
-                                        .required(val.required())
-                                        .style(val.style())
+                                        .label((*val).get_question())
+                                        .required((*val).required())
+                                        .style((*val).style())
                                 })
                             })
                         })

@@ -46,8 +46,8 @@ impl Questions for ShopkeepQuestions {
         }
     }
 }
-pub const SHOPKEEP_QUESTIONS: [ShopkeepQuestions; 3] = [
-    ShopkeepQuestions::Shop,
-    ShopkeepQuestions::Character,
-    ShopkeepQuestions::Why,
-];
+pub fn get_questions() -> Vec<Box<dyn super::Questions + Send + Sync>> { vec![
+    Box::from(ShopkeepQuestions::Shop),
+    Box::from(ShopkeepQuestions::Character),
+    Box::from(ShopkeepQuestions::Why),
+]}

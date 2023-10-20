@@ -1,4 +1,3 @@
-mod embeds;
 use std::str::FromStr;
 
 use serenity::{
@@ -19,7 +18,7 @@ use serenity::{
 
 use crate::config::{self, SecretType};
 
-use self::embeds::{dm, get_question_from_id, lore, send_modal, sheetcheck, shopkeep, staff, homebrew};
+use super::tickets::{dm, get_question_from_id, lore, send_modal, sheetcheck, shopkeep, staff, homebrew, character, respec};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct Question {
@@ -113,14 +112,14 @@ impl TicketType {
     }
     pub fn get_embed(self, e: &mut CreateEmbed) -> &mut CreateEmbed {
         match self {
-            TicketType::Character => embeds::character::embed(e),
-            TicketType::Respec => embeds::respec::embed(e),
-            TicketType::Dm => embeds::dm::embed(e),
-            TicketType::Sheetcheck => embeds::sheetcheck::embed(e),
-            TicketType::Shopkeep => embeds::shopkeep::embed(e),
-            TicketType::Staff => embeds::staff::embed(e),
-            TicketType::Lore => embeds::lore::embed(e),
-            TicketType::Homebrew => embeds::homebrew::embed(e)
+            TicketType::Character => character::embed(e),
+            TicketType::Respec => respec::embed(e),
+            TicketType::Dm => dm::embed(e),
+            TicketType::Sheetcheck => sheetcheck::embed(e),
+            TicketType::Shopkeep => shopkeep::embed(e),
+            TicketType::Staff => staff::embed(e),
+            TicketType::Lore => lore::embed(e),
+            TicketType::Homebrew => homebrew::embed(e)
         }
     }
 }
@@ -130,70 +129,23 @@ pub async fn open_modal(
     command: &MessageComponentInteraction,
     ticket_type: TicketType,
 ) -> Result<String, String> {
-    match ticket_type {
-        TicketType::Lore => {
-            send_modal(
-                ticket_type.get_modal_id().to_string(),
-                &ctx,
-                &command,
-                lore::LORE_QUESTIONS.as_ref(),
-                ticket_type.get_title(),
-            )
-            .await
-        }
-        TicketType::Dm => {
-            send_modal(
-                ticket_type.get_modal_id().to_string(),
-                &ctx,
-                &command,
-                dm::DM_QUESTIONS.as_ref(),
-                ticket_type.get_title(),
-            )
-            .await
-        }
-        TicketType::Sheetcheck => {
-            send_modal(
-                ticket_type.get_modal_id().to_string(),
-                &ctx,
-                &command,
-                sheetcheck::SHEETCHECK_QUESTIONS.as_ref(),
-                ticket_type.get_title(),
-            )
-            .await
-        }
-        TicketType::Staff => {
-            send_modal(
-                ticket_type.get_modal_id().to_string(),
-                &ctx,
-                &command,
-                staff::STAFF_QUESTIONS.as_ref(),
-                ticket_type.get_title(),
-            )
-            .await
-        }
-        TicketType::Shopkeep => {
-            send_modal(
-                ticket_type.get_modal_id().to_string(),
-                &ctx,
-                &command,
-                shopkeep::SHOPKEEP_QUESTIONS.as_ref(),
-                ticket_type.get_title(),
-            )
-            .await
-        }
-        TicketType::Homebrew => {
-            send_modal(
-                ticket_type.get_modal_id().to_string(),
-                &ctx,
-                &command,
-                homebrew::HOMEBREW_QUESTIONS.as_ref(),
-                ticket_type.get_title(),
-            )
-            .await
-        }
-        TicketType::Character => unimplemented!(),
-        TicketType::Respec => unimplemented!(),
-    };
+    send_modal(
+        ticket_type.get_modal_id().to_string(),
+        &ctx,
+        &command,
+        &match ticket_type {
+            TicketType::Dm => dm::get_questions(),
+            TicketType::Shopkeep => shopkeep::get_questions(),
+            TicketType::Sheetcheck => sheetcheck::get_questions(),
+            TicketType::Lore => lore::get_questions(),
+            TicketType::Staff => staff::get_questions(),
+            TicketType::Homebrew => homebrew::get_questions(),
+            _ => unimplemented!(),
+
+        },
+        ticket_type.get_title()
+        ).await;
+
     Ok("Modal Opened".to_string())
 }
 

@@ -88,8 +88,8 @@ impl Questions for SheetcheckQuestions {
         }
     }
 }
-pub const SHEETCHECK_QUESTIONS: [SheetcheckQuestions; 3] = [
-    SheetcheckQuestions::Age,
-    SheetcheckQuestions::ServerTime,
-    SheetcheckQuestions::Why,
-];
+pub fn get_questions() -> Vec<Box<dyn super::Questions + Send + Sync>> { vec![
+    Box::from(SheetcheckQuestions::Age),
+    Box::from(SheetcheckQuestions::ServerTime),
+    Box::from(SheetcheckQuestions::Why),
+]}
