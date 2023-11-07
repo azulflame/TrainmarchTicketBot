@@ -18,7 +18,7 @@ use serenity::{
 
 use crate::config::{self, SecretType};
 
-use super::tickets::{dm, get_question_from_id, lore, send_modal, sheetcheck, shopkeep, staff, homebrew, character, respec};
+use super::tickets::{dm, get_question_from_id, lore, send_modal, sheetcheck, staff, homebrew, character, respec};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct Question {
@@ -32,7 +32,6 @@ pub enum TicketType {
     Respec,
     Dm,
     Sheetcheck,
-    Shopkeep,
     Staff,
     Lore,
     Homebrew,
@@ -57,14 +56,12 @@ impl FromStr for TicketType {
             "create_respec_ticket" => Ok(TicketType::Respec),
             "create_dm_ticket" => Ok(TicketType::Dm),
             "create_sheetcheck_ticket" => Ok(TicketType::Sheetcheck),
-            "create_shopkeep_ticket" => Ok(TicketType::Shopkeep),
             "create_staff_ticket" => Ok(TicketType::Staff),
             "create_lore_ticket" => Ok(TicketType::Lore),
             "create_homebrew_ticket" => Ok(TicketType::Homebrew),
             "lore_ticket_modal" => Ok(TicketType::Lore),
             "dm_ticket_modal" => Ok(TicketType::Dm),
             "sheetcheck_ticket_modal" => Ok(TicketType::Sheetcheck),
-            "shopkeep_ticket_modal" => Ok(TicketType::Shopkeep),
             "staff_ticket_modal" => Ok(TicketType::Staff),
             "homebrew_ticket_modal" => Ok(TicketType::Homebrew),
             _ => Err(()),
@@ -79,7 +76,6 @@ impl TicketType {
             TicketType::Respec => "respec",
             TicketType::Dm => "dm",
             TicketType::Sheetcheck => "sheetcheck",
-            TicketType::Shopkeep => "shopkeep",
             TicketType::Staff => "staff",
             TicketType::Lore => "lore",
             TicketType::Homebrew => "homebrew"
@@ -91,7 +87,6 @@ impl TicketType {
             TicketType::Character | TicketType::Respec => unimplemented!(),
             TicketType::Dm => "dm_ticket_modal",
             TicketType::Sheetcheck => "sheetcheck_ticket_modal",
-            TicketType::Shopkeep => "shopkeep_ticket_modal",
             TicketType::Staff => "staff_ticket_modal",
             TicketType::Lore => "lore_ticket_modal",
             TicketType::Homebrew => "homebrew_ticket_modal",
@@ -102,8 +97,7 @@ impl TicketType {
             TicketType::Character => todo!(),
             TicketType::Respec => todo!(),
             TicketType::Dm => "DM Application",
-            TicketType::Sheetcheck => "Sheetchecker Application",
-            TicketType::Shopkeep => "Shopkeep Application",
+            TicketType::Sheetcheck => "Player Affairs Team Application",
             TicketType::Staff => "Staff Application",
             TicketType::Lore => "Lore Team Application",
             TicketType::Homebrew => "Homebrew Team Application",
@@ -116,7 +110,6 @@ impl TicketType {
             TicketType::Respec => respec::embed(e),
             TicketType::Dm => dm::embed(e),
             TicketType::Sheetcheck => sheetcheck::embed(e),
-            TicketType::Shopkeep => shopkeep::embed(e),
             TicketType::Staff => staff::embed(e),
             TicketType::Lore => lore::embed(e),
             TicketType::Homebrew => homebrew::embed(e)
@@ -135,7 +128,6 @@ pub async fn open_modal(
         &command,
         &match ticket_type {
             TicketType::Dm => dm::get_questions(),
-            TicketType::Shopkeep => shopkeep::get_questions(),
             TicketType::Sheetcheck => sheetcheck::get_questions(),
             TicketType::Lore => lore::get_questions(),
             TicketType::Staff => staff::get_questions(),

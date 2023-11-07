@@ -50,7 +50,6 @@ impl EventHandler for Handler {
                     // Open a modal
                     TicketType::Dm
                     | TicketType::Sheetcheck
-                    | TicketType::Shopkeep
                     | TicketType::Homebrew
                     | TicketType::Staff
                     | TicketType::Lore => open_modal(&ctx, &command, ticket_type).await,

@@ -14,7 +14,6 @@ pub enum SecretType {
     Sheetcheck,
     Character,
     Homebrew,
-    Shopkeep,
     BotRole,
     GuildId,
     Respec,
@@ -31,7 +30,6 @@ impl SecretType {
             SecretType::LogChannel => "LOG_CHANNEL",
             SecretType::Sheetcheck => "SHEETCHECK",
             SecretType::Character => "CHARACTER",
-            SecretType::Shopkeep => "SHOPKEEP",
             SecretType::Homebrew => "HOMEBREW",
             SecretType::GuildId => "GUILD_ID",
             SecretType::BotRole => "BOT_ROLE",
@@ -51,7 +49,6 @@ impl From<TicketType> for SecretType {
             TicketType::Dm => SecretType::Dm,
             TicketType::Homebrew => SecretType::Homebrew,
             TicketType::Sheetcheck => SecretType::Sheetcheck,
-            TicketType::Shopkeep => SecretType::Shopkeep,
             TicketType::Staff => SecretType::Staff,
             TicketType::Lore => SecretType::Lore,
         }
