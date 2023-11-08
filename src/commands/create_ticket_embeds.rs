@@ -17,8 +17,8 @@ pub async fn run(ctx: &Context, command: &ApplicationCommandInteraction) -> Resu
             .components(|c| {
                 c.create_action_row(|row| {
                     row
-                    .add_button(CreateButton::default().custom_id("create_character_ticket").label("Character Application").style(ButtonStyle::Primary).to_owned())
-                    .add_button(CreateButton::default().custom_id("create_respec_ticket").label("Respec Application").style(ButtonStyle::Primary).to_owned())
+                    .add_button(CreateButton::default().custom_id("create_character_ticket").label("Create Character").style(ButtonStyle::Primary).to_owned())
+                    .add_button(CreateButton::default().custom_id("create_respec_ticket").label("Respec Character").style(ButtonStyle::Primary).to_owned())
                 })
             })
         })
@@ -36,10 +36,9 @@ pub async fn run(ctx: &Context, command: &ApplicationCommandInteraction) -> Resu
                 .components(|c| {
                     c.create_action_row(|r|
                                         {
-                                            r.add_button(CreateButton::default().custom_id("create_dm_ticket").label("DM Application").style(ButtonStyle::Primary).to_owned())
-                                                .add_button(CreateButton::default().custom_id("create_homebrew_ticket").label("Homebrew Application").style(ButtonStyle::Primary).to_owned())
-                                                .add_button(CreateButton::default().custom_id("create_shopkeep_ticket").label("Shopkeep Application").style(ButtonStyle::Primary).to_owned())
-                                                .add_button(CreateButton::default().custom_id("create_sheetcheck_ticket").label("Sheetchecker Application").style(ButtonStyle::Primary).to_owned())
+                                            r.add_button(CreateButton::default().custom_id("create_dm_ticket").label("Dungeon Master").style(ButtonStyle::Primary).to_owned())
+                                                .add_button(CreateButton::default().custom_id("create_homebrew_ticket").label("Homebrew Team").style(ButtonStyle::Primary).to_owned())
+                                                .add_button(CreateButton::default().custom_id("create_sheetcheck_ticket").label("Player Affairs").style(ButtonStyle::Primary).to_owned())
                                         }
                                        )
                 })
@@ -55,8 +54,8 @@ pub async fn run(ctx: &Context, command: &ApplicationCommandInteraction) -> Resu
             .components(|c| {
                 c.create_action_row(|r|
                                     {
-                                        r.add_button(CreateButton::default().custom_id("create_staff_ticket").label("Staff Application").style(ButtonStyle::Primary).to_owned())
-                                            .add_button(CreateButton::default().custom_id("create_lore_ticket").label("Lore Team Application").style(ButtonStyle::Primary).to_owned())
+                                        r.add_button(CreateButton::default().custom_id("create_staff_ticket").label("Staff").style(ButtonStyle::Primary).to_owned())
+                                            .add_button(CreateButton::default().custom_id("create_lore_ticket").label("Lore Team").style(ButtonStyle::Primary).to_owned())
                                     })
             })
         }).await.map_err(|_| "And error was encountered creating the Server Management embed".to_string())?;

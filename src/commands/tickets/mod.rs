@@ -8,7 +8,7 @@ use serenity::{
 
 use self::{
     dm::DmQuestions, lore::LoreQuestions, sheetcheck::SheetcheckQuestions,
-    shopkeep::ShopkeepQuestions, staff::StaffQuestions, homebrew::HomebrewQuestions,
+    staff::StaffQuestions, homebrew::HomebrewQuestions,
 };
 
 pub mod character;
@@ -16,7 +16,6 @@ pub mod dm;
 pub mod lore;
 pub mod respec;
 pub mod sheetcheck;
-pub mod shopkeep;
 pub mod staff;
 pub mod homebrew;
 
@@ -72,11 +71,6 @@ pub async fn send_modal(
 }
 pub fn get_question_from_id(id: &str) -> String {
     let question = match id {
-        _ if id == ShopkeepQuestions::Shop.get_id() => ShopkeepQuestions::Shop.get_question(),
-        _ if id == ShopkeepQuestions::Why.get_id() => ShopkeepQuestions::Why.get_question(),
-        _ if id == ShopkeepQuestions::Character.get_id() => {
-            ShopkeepQuestions::Character.get_question()
-        }
         _ if id == DmQuestions::Age.get_id() => DmQuestions::Age.get_question(),
         _ if id == DmQuestions::Experience.get_id() => DmQuestions::Experience.get_question(),
         _ if id == DmQuestions::Vouch.get_id() => DmQuestions::Vouch.get_question(),
