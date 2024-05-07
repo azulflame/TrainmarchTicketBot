@@ -75,7 +75,7 @@ impl TicketType {
             TicketType::Character => "character",
             TicketType::Respec => "respec",
             TicketType::Dm => "dm",
-            TicketType::Sheetcheck => "sheetcheck",
+            TicketType::Sheetcheck => "player-affairs",
             TicketType::Staff => "staff",
             TicketType::Lore => "lore",
             TicketType::Homebrew => "homebrew"
