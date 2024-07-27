@@ -38,7 +38,7 @@ pub async fn run(ctx: &Context, command: &ApplicationCommandInteraction) -> Resu
                                         {
                                             r.add_button(CreateButton::default().custom_id("create_dm_ticket").label("Dungeon Master").style(ButtonStyle::Primary).to_owned())
                                                 .add_button(CreateButton::default().custom_id("create_homebrew_ticket").label("Homebrew Team").style(ButtonStyle::Primary).to_owned())
-                                                .add_button(CreateButton::default().custom_id("create_sheetcheck_ticket").label("Player Affairs").style(ButtonStyle::Primary).to_owned())
+                                                .add_button(CreateButton::default().custom_id("create_sheetcheck_ticket").label("Sheet Checker").style(ButtonStyle::Primary).to_owned())
                                         }
                                        )
                 })

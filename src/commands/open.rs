@@ -75,7 +75,7 @@ impl TicketType {
             TicketType::Character => "character",
             TicketType::Respec => "respec",
             TicketType::Dm => "dm",
-            TicketType::Sheetcheck => "player-affairs",
+            TicketType::Sheetcheck => "sheetcheck",
             TicketType::Staff => "staff",
             TicketType::Lore => "lore",
             TicketType::Homebrew => "homebrew"
@@ -97,7 +97,7 @@ impl TicketType {
             TicketType::Character => todo!(),
             TicketType::Respec => todo!(),
             TicketType::Dm => "DM Application",
-            TicketType::Sheetcheck => "Player Affairs Team Application",
+            TicketType::Sheetcheck => "Sheet Checker Application",
             TicketType::Staff => "Staff Application",
             TicketType::Lore => "Lore Team Application",
             TicketType::Homebrew => "Homebrew Team Application",

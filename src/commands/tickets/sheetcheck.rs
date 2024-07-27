@@ -18,7 +18,7 @@ const DICECLOUD: &[&str] = &[
 
 pub fn embed(embed: &mut CreateEmbed) -> &mut CreateEmbed {
     embed
-        .title("Thanks for the Player Affairs Team Application")
+        .title("Thanks for the Sheet Check Team Application")
         .field(
             "Sample Sheets",
             "Please do your best to find the problems with these sample sheets, and the Head of Player Affairs will get to you when you finish.",
@@ -63,7 +63,7 @@ impl Questions for SheetcheckQuestions {
         match &self {
             SheetcheckQuestions::Age => "What is your age?",
             SheetcheckQuestions::ServerTime => "How long have you been on the server?",
-            SheetcheckQuestions::Why => "Why do you want to be on Player Affairs?",
+            SheetcheckQuestions::Why => "Why do you want to be a Sheet Checker?",
         }
     }
     fn get_id(&self) -> &str {
