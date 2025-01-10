@@ -1,7 +1,8 @@
-use serenity::{builder::CreateEmbed, model::prelude::component::InputTextStyle};
+use serenity::all::InputTextStyle;
+use serenity::builder::CreateEmbed;
 
-pub fn embed(embed: &mut CreateEmbed) -> &mut CreateEmbed {
-    embed.title("Thanks for the Staff Application").field(
+pub fn embed() -> CreateEmbed {
+    CreateEmbed::new().title("Thanks for the Staff Application").field(
         "Your ticket has been created.",
         "We have received your application. We will review it when we have time.",
         false,
@@ -50,9 +51,11 @@ impl super::Questions for StaffQuestions {
     }
 }
 
-pub fn get_questions() -> Vec<Box<dyn super::Questions + Send + Sync>> { vec![
-    Box::from(StaffQuestions::Age),
-    Box::from(StaffQuestions::Experience),
-    Box::from(StaffQuestions::ServerTime),
-    Box::from(StaffQuestions::Why),
-]}
+pub fn get_questions() -> Vec<Box<dyn super::Questions + Send + Sync>> {
+    vec![
+        Box::from(StaffQuestions::Age),
+        Box::from(StaffQuestions::Experience),
+        Box::from(StaffQuestions::ServerTime),
+        Box::from(StaffQuestions::Why),
+    ]
+}

@@ -1,6 +1,6 @@
 use std::{collections::BTreeMap, sync::Once};
 
-use shuttle_secrets::SecretStore;
+use shuttle_runtime::SecretStore;
 
 use crate::commands::open::TicketType;
 
@@ -8,6 +8,8 @@ static mut CONFIG: Option<SecretStore> = None;
 static INIT_CONFIG: Once = Once::new();
 
 pub enum SecretType {
+    HomebrewCategoryId,
+    HomebrewSubmission,
     DiscordToken,
     CategoryId,
     LogChannel,
@@ -25,6 +27,8 @@ pub enum SecretType {
 impl SecretType {
     fn to_string(&self) -> String {
         match self {
+            SecretType::HomebrewCategoryId => "HB_CATEGORY_ID",
+            SecretType::HomebrewSubmission => "HB_REVIEW_ROLE",
             SecretType::DiscordToken => "DISCORD_TOKEN",
             SecretType::CategoryId => "CATEGORY_ID",
             SecretType::LogChannel => "LOG_CHANNEL",
@@ -51,6 +55,11 @@ impl From<TicketType> for SecretType {
             TicketType::Sheetcheck => SecretType::Sheetcheck,
             TicketType::Staff => SecretType::Staff,
             TicketType::Lore => SecretType::Lore,
+            TicketType::HbItem => SecretType::HomebrewSubmission,
+            TicketType::HbFeat => SecretType::HomebrewSubmission,
+            TicketType::HbSpell => SecretType::HomebrewSubmission,
+            TicketType::HbSubclass => SecretType::HomebrewSubmission,
+            TicketType::HbOther => SecretType::HomebrewSubmission
         }
     }
 }

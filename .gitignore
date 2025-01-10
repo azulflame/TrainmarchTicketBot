@@ -2,4 +2,8 @@
 Secrets.toml
 Secrets.dev.toml
 ~
-.gitignore
+.gitignore.shuttle*
+Secrets*.toml
+
+.idea
+.shuttle

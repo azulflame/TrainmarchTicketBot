@@ -1,17 +1,13 @@
 mod commands;
 mod config;
-use serenity::model::prelude::interaction::InteractionResponseType::DeferredUpdateMessage;
-use serenity::{
-    async_trait,
-    model::prelude::{interaction::Interaction, GuildId, Ready},
-    prelude::{Context, EventHandler, GatewayIntents},
-    Client,
-};
-use std::str::FromStr;
 
 use commands::open::TicketType;
-use shuttle_secrets::SecretStore;
-
+use serenity::all::{CreateInteractionResponse, CreateInteractionResponseFollowup, GuildId, Interaction, Ready};
+use serenity::prelude::*;
+use serenity::{async_trait, Client};
+use shuttle_runtime::SecretStore;
+use std::error::Error;
+use std::str::FromStr;
 use crate::commands::open::open_modal;
 struct Handler;
 #[derive(Eq, PartialEq)]
@@ -32,11 +28,28 @@ impl FromStr for CommandType {
 
 #[async_trait]
 impl EventHandler for Handler {
-    // Handle slash commands or other interactions
+    // When the bot is ready
+    async fn ready(&self, ctx: Context, _ready: Ready) {
+        let guild_id_num = config::get_config_val(config::SecretType::GuildId)
+            .parse()
+            .expect("GUILD_ID must be an integer");
+        let guild_id = GuildId::new(guild_id_num);
+
+        let _commands = guild_id
+            .set_commands(&ctx.http, vec![
+                commands::close::register(),
+                commands::create_ticket_embeds::register()
+            ]
+            )
+            .await
+            .unwrap();
+        println!("Bot ready!");
+    }
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
-        // Message button interaction
-        if let Interaction::MessageComponent(command) = interaction.clone() {
+        // message button interaction
+        if let Interaction::Component(command) = interaction.clone() {
             if let Ok(ticket_type) = TicketType::from_str(&command.data.custom_id) {
+                println!("Create Interaction: {}", &command.data.custom_id.to_string());
                 let response = match ticket_type {
                     // Directly open a ticket
                     TicketType::Character => {
@@ -52,27 +65,33 @@ impl EventHandler for Handler {
                     | TicketType::Sheetcheck
                     | TicketType::Homebrew
                     | TicketType::Staff
-                    | TicketType::Lore => open_modal(&ctx, &command, ticket_type).await,
+                    | TicketType::Lore
+                    | TicketType::HbSubclass
+                    | TicketType::HbFeat
+                    | TicketType::HbItem
+                    | TicketType::HbSpell
+                    | TicketType::HbOther => open_modal(&ctx, &command, ticket_type).await,
                 };
                 if ticket_type == TicketType::Character || ticket_type == TicketType::Respec {
                     match match response {
                         Ok(x) => {
                             command
-                                .create_followup_message(&ctx.http, |f| {
-                                    f.content(format!("Your ticket has been created at <#{}>", x))
-                                        .ephemeral(true)
-                                })
+                                .create_followup(&ctx.http,
+                                                 CreateInteractionResponseFollowup::new()
+                                                     .content(format!("Your ticket has been created at <#{}>", x))
+                                                     .ephemeral(true)
+                                )
                                 .await
                         }
                         Err(x) => {
                             command
-                                .create_followup_message(&ctx.http, |f| {
-                                    f.content(format!(
+                                .create_followup(&ctx.http, CreateInteractionResponseFollowup::new()
+                                    .content(format!(
                                         "There was an error opening your ticket: {}",
                                         x
                                     ))
                                     .ephemeral(true)
-                                })
+                                )
                                 .await
                         }
                     } {
@@ -82,9 +101,8 @@ impl EventHandler for Handler {
                 }
             }
         }
-
         // Slash command interaction
-        if let Interaction::ApplicationCommand(command) = interaction.clone() {
+        if let Interaction::Command(command) = interaction.clone() {
             command.defer(&ctx.http).await.unwrap();
             if let Ok(command_type) = CommandType::from_str(&command.data.name) {
                 let response = match command_type {
@@ -96,28 +114,27 @@ impl EventHandler for Handler {
 
                 let _x = match response {
                     Ok(_) if command_type != CommandType::Close => command
-                        .create_followup_message(&ctx.http, |f| {
-                            f.content("Created").ephemeral(true)
-                        })
+                        .create_followup(&ctx.http, CreateInteractionResponseFollowup::new()
+                            .content("Created").ephemeral(true))
                         .await
                         .is_ok(),
                     Ok(_) => command
-                        .create_interaction_response(&ctx.http, |f| f.kind(DeferredUpdateMessage))
+                        .create_response(&ctx.http, CreateInteractionResponse::UpdateMessage(Default::default()))
                         .await
                         .is_ok(),
+
                     Err(x) => command
-                        .create_followup_message(&ctx.http, |f| {
-                            f.content(format!("There was an error opening your ticket: {}", x))
+                        .create_followup(&ctx.http, CreateInteractionResponseFollowup::new().content(format!("There was an error opening your ticket: {}", x))
                                 .ephemeral(true)
-                        })
+                        )
                         .await
-                        .is_ok(),
+                        .is_ok()
                 };
             }
         }
 
         // Modal submission
-        if let Interaction::ModalSubmit(submission) = interaction.clone() {
+        if let Interaction::Modal(submission) = interaction.clone() {
             submission.defer(&ctx.http).await.unwrap();
             println!("{}", submission.data.custom_id);
             let message = match match TicketType::from_str(submission.data.custom_id.as_str()) {
@@ -133,35 +150,16 @@ impl EventHandler for Handler {
                 Err(x) => format!("There was an error opening your ticket: {}", x),
             };
             submission
-                .create_followup_message(&ctx.http, |f| f.content(message).ephemeral(true))
+                .create_followup(&ctx.http, CreateInteractionResponseFollowup::new().content(message).ephemeral(true))
                 .await
                 .unwrap();
         }
-    }
-
-    // When the bot is ready
-    async fn ready(&self, ctx: Context, _ready: Ready) {
-        let guild_id_num = config::get_config_val(config::SecretType::GuildId)
-            .parse()
-            .expect("GUILD_ID must be an integer");
-        let guild_id = GuildId(guild_id_num);
-
-        let _commands = GuildId::set_application_commands(&guild_id, &ctx.http, |commands| {
-            commands
-                .create_application_command(|command| commands::close::register(command))
-                .create_application_command(|command| {
-                    commands::create_ticket_embeds::register(command)
-                })
-        })
-        .await
-        .unwrap();
-        println!("Bot ready!");
     }
 }
 
 #[shuttle_runtime::main]
 async fn serenity(
-    #[shuttle_secrets::Secrets] secrets: SecretStore,
+    #[shuttle_runtime::Secrets] secrets: SecretStore,
 ) -> shuttle_serenity::ShuttleSerenity {
     config::load_config(secrets);
     let token = config::get_config_val(config::SecretType::DiscordToken);

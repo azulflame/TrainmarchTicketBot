@@ -1,7 +1,8 @@
-use serenity::{builder::CreateEmbed, model::prelude::component::InputTextStyle};
+use serenity::all::InputTextStyle;
+use serenity::builder::CreateEmbed;
 
-pub fn embed(embed: &mut CreateEmbed) -> &mut CreateEmbed {
-    embed
+pub fn embed() -> CreateEmbed {
+    CreateEmbed::new()
         .title("Thanks for the DM Application")
         .field("Your application has been created.", "The Head DM will review your answers and may go forward with the process when they have time.", false)
 }
@@ -55,10 +56,11 @@ impl super::Questions for DmQuestions {
 }
 
 pub fn get_questions() -> Vec<Box<dyn super::Questions + Send + Sync>> {
-    vec![Box::from(DmQuestions::Age),
-    Box::from(DmQuestions::Experience),
-    Box::from(DmQuestions::ServerTime),
-    Box::from(DmQuestions::Vouch),
-    Box::from(DmQuestions::Why),
+    vec![
+        Box::from(DmQuestions::Age),
+        Box::from(DmQuestions::Experience),
+        Box::from(DmQuestions::ServerTime),
+        Box::from(DmQuestions::Vouch),
+        Box::from(DmQuestions::Why),
     ]
 }

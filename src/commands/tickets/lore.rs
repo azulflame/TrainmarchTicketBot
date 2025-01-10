@@ -1,10 +1,10 @@
-use serenity::{builder::CreateEmbed, model::prelude::component::InputTextStyle};
+use serenity::all::InputTextStyle;
+use serenity::builder::CreateEmbed;
 
-pub fn embed(embed: &mut CreateEmbed) -> &mut CreateEmbed {
-    embed
+pub fn embed() -> CreateEmbed {
+    CreateEmbed::new()
         .title("Thanks for the Lore Team Application")
         .field("Your application has been created.", "The Lore Team will review your answers and may go forward with the process when they have time.", false)
-        .field("Short Story", "In this ticket, write me a short story about a chicken that crossed the road. Minimum 5 sentences.", false)
 }
 
 #[derive(Clone, Copy)]
@@ -49,9 +49,11 @@ impl super::Questions for LoreQuestions {
         }
     }
 }
-pub fn get_questions() -> Vec<Box<dyn super::Questions + Send + Sync>> { vec![
-    Box::from(LoreQuestions::Age),
-    Box::from(LoreQuestions::ServerTime),
-    Box::from(LoreQuestions::Vouch),
-    Box::from(LoreQuestions::Why),
-]}
+pub fn get_questions() -> Vec<Box<dyn super::Questions + Send + Sync>> {
+    vec![
+        Box::from(LoreQuestions::Age),
+        Box::from(LoreQuestions::ServerTime),
+        Box::from(LoreQuestions::Vouch),
+        Box::from(LoreQuestions::Why),
+    ]
+}

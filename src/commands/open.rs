@@ -1,24 +1,18 @@
 use std::str::FromStr;
 
+use super::tickets::{
+    character, dm, get_question_from_id, homebrew, lore, respec, send_modal, sheetcheck, staff,
+    hb_item, hb_feat, hb_other, hb_spell, hb_subclass
+};
+use crate::config::{self, SecretType};
+use serenity::all::{ActionRowComponent, ComponentInteraction, CreateMessage, ModalInteraction};
+use serenity::builder::CreateChannel;
 use serenity::{
     builder::CreateEmbed,
-    model::{
-        prelude::{
-            component::ActionRowComponent,
-            interaction::{
-                message_component::MessageComponentInteraction, modal::ModalSubmitInteraction,
-            },
-            ChannelId, GuildId, PermissionOverwrite, PermissionOverwriteType, RoleId, UserId,
-        },
-        Permissions,
-    },
+    model::{prelude::*, Permissions},
     prelude::Context,
-    utils::Color,
 };
-
-use crate::config::{self, SecretType};
-
-use super::tickets::{dm, get_question_from_id, lore, send_modal, sheetcheck, staff, homebrew, character, respec};
+use regex::Regex;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct Question {
@@ -35,6 +29,11 @@ pub enum TicketType {
     Staff,
     Lore,
     Homebrew,
+    HbItem,
+    HbFeat,
+    HbSpell,
+    HbSubclass,
+    HbOther,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -51,6 +50,7 @@ pub struct TicketInformation {
 impl FromStr for TicketType {
     type Err = ();
     fn from_str(input: &str) -> Result<TicketType, ()> {
+        println!("{}", &input);
         match input {
             "create_character_ticket" => Ok(TicketType::Character),
             "create_respec_ticket" => Ok(TicketType::Respec),
@@ -64,6 +64,16 @@ impl FromStr for TicketType {
             "sheetcheck_ticket_modal" => Ok(TicketType::Sheetcheck),
             "staff_ticket_modal" => Ok(TicketType::Staff),
             "homebrew_ticket_modal" => Ok(TicketType::Homebrew),
+            "hb_item_modal" => Ok(TicketType::HbItem),
+            "hb_feat_modal" => Ok(TicketType::HbFeat),
+            "hb_spell_modal" => Ok(TicketType::HbSpell),
+            "hb_other_modal" => Ok(TicketType::HbOther),
+            "hb_subclass_modal" => Ok(TicketType::HbSubclass),
+            "create_homebrew_item" => Ok(TicketType::HbItem),
+            "create_homebrew_feat" => Ok(TicketType::HbFeat),
+            "create_homebrew_spell" => Ok(TicketType::HbSpell),
+            "create_homebrew_subclass" => Ok(TicketType::HbSubclass),
+            "create_homebrew_other" => Ok(TicketType::HbOther),
             _ => Err(()),
         }
     }
@@ -78,7 +88,12 @@ impl TicketType {
             TicketType::Sheetcheck => "sheetcheck",
             TicketType::Staff => "staff",
             TicketType::Lore => "lore",
-            TicketType::Homebrew => "homebrew"
+            TicketType::Homebrew => "homebrew",
+            TicketType::HbItem => "item",
+            TicketType::HbFeat => "feat",
+            TicketType::HbSpell => "spell",
+            TicketType::HbOther => "other",
+            TicketType::HbSubclass => "subclass",
         }
         .to_string()
     }
@@ -90,6 +105,11 @@ impl TicketType {
             TicketType::Staff => "staff_ticket_modal",
             TicketType::Lore => "lore_ticket_modal",
             TicketType::Homebrew => "homebrew_ticket_modal",
+            TicketType::HbItem => "hb_item_modal",
+            TicketType::HbFeat => "hb_feat_modal",
+            TicketType::HbSpell => "hb_spell_modal",
+            TicketType::HbOther => "hb_other_modal",
+            TicketType::HbSubclass => "hb_subclass_modal",
         }
     }
     pub fn get_title(&self) -> String {
@@ -101,25 +121,45 @@ impl TicketType {
             TicketType::Staff => "Staff Application",
             TicketType::Lore => "Lore Team Application",
             TicketType::Homebrew => "Homebrew Team Application",
+            TicketType::HbItem => "Homebrew Item Application",
+            TicketType::HbFeat => "Homebrew Feat Application",
+            TicketType::HbSpell => "Homebrew Spell Application",
+            TicketType::HbOther => "Homebrew Other Application",
+            TicketType::HbSubclass => "Homebrew Subclass Application",
         }
         .to_string()
     }
-    pub fn get_embed(self, e: &mut CreateEmbed) -> &mut CreateEmbed {
+    pub fn get_embed(self) -> CreateEmbed {
         match self {
-            TicketType::Character => character::embed(e),
-            TicketType::Respec => respec::embed(e),
-            TicketType::Dm => dm::embed(e),
-            TicketType::Sheetcheck => sheetcheck::embed(e),
-            TicketType::Staff => staff::embed(e),
-            TicketType::Lore => lore::embed(e),
-            TicketType::Homebrew => homebrew::embed(e)
+            TicketType::Character => character::embed(),
+            TicketType::Respec => respec::embed(),
+            TicketType::Dm => dm::embed(),
+            TicketType::Sheetcheck => sheetcheck::embed(),
+            TicketType::Staff => staff::embed(),
+            TicketType::Lore => lore::embed(),
+            TicketType::Homebrew => homebrew::embed(),
+            TicketType::HbItem => hb_item::embed(),
+            TicketType::HbFeat => hb_feat::embed(),
+            TicketType::HbSpell => hb_spell::embed(),
+            TicketType::HbSubclass => hb_subclass::embed(),
+            TicketType::HbOther => hb_other::embed()
+        }
+    }
+    pub fn get_category(self) -> SecretType {
+        match self {
+            TicketType::HbSubclass
+            | TicketType::HbItem
+            | TicketType::HbSpell
+            | TicketType::HbOther
+            | TicketType::HbFeat => SecretType::HomebrewCategoryId,
+            _ => SecretType::CategoryId
         }
     }
 }
 
 pub async fn open_modal(
     ctx: &Context,
-    command: &MessageComponentInteraction,
+    command: &ComponentInteraction,
     ticket_type: TicketType,
 ) -> Result<String, String> {
     send_modal(
@@ -132,11 +172,16 @@ pub async fn open_modal(
             TicketType::Lore => lore::get_questions(),
             TicketType::Staff => staff::get_questions(),
             TicketType::Homebrew => homebrew::get_questions(),
+            TicketType::HbItem => hb_item::get_questions(),
+            TicketType::HbFeat => hb_feat::get_questions(),
+            TicketType::HbSpell => hb_spell::get_questions(),
+            TicketType::HbOther => hb_other::get_questions(),
+            TicketType::HbSubclass => hb_subclass::get_questions(),
             _ => unimplemented!(),
-
         },
-        ticket_type.get_title()
-        ).await;
+        ticket_type.get_title(),
+    )
+    .await;
 
     Ok("Modal Opened".to_string())
 }
@@ -158,30 +203,30 @@ pub async fn create_ticket(
         .parse::<u64>()
         .map_err(|_| "Unable to retrieve the retrieved role ID into u64")?;
 
-    let category_id = config::get_config_val(SecretType::CategoryId)
+    let category_id = config::get_config_val(ticket_type.get_category())
         .parse::<u64>()
         .map_err(|_| "Unable to parse the retrieved category ID".to_string())?;
 
-    let perms = vec![
+    let mut perms = vec![
         PermissionOverwrite {
             allow: Permissions::VIEW_CHANNEL,
             deny: Permissions::empty(),
-            kind: PermissionOverwriteType::Role(RoleId(bot_role)),
+            kind: PermissionOverwriteType::Role(RoleId::new(bot_role)),
         },
         PermissionOverwrite {
             allow: Permissions::empty(),
             deny: Permissions::VIEW_CHANNEL,
-            kind: PermissionOverwriteType::Role(RoleId(information.guild_id)),
+            kind: PermissionOverwriteType::Role(RoleId::new(information.guild_id)),
         },
         PermissionOverwrite {
             allow: Permissions::VIEW_CHANNEL,
             deny: Permissions::empty(),
-            kind: PermissionOverwriteType::Role(RoleId(staff_role)),
+            kind: PermissionOverwriteType::Role(RoleId::new(staff_role)),
         },
         PermissionOverwrite {
             allow: Permissions::VIEW_CHANNEL,
             deny: Permissions::empty(),
-            kind: PermissionOverwriteType::Role(RoleId(ticket_role)),
+            kind: PermissionOverwriteType::Role(RoleId::new(ticket_role)),
         },
         PermissionOverwrite {
             allow: Permissions::VIEW_CHANNEL,
@@ -189,6 +234,11 @@ pub async fn create_ticket(
             kind: PermissionOverwriteType::Member(information.author),
         },
     ];
+    if vec![TicketType::HbFeat, TicketType::HbItem, TicketType::HbSpell, TicketType::HbOther, TicketType::HbSubclass]
+        .contains(&TicketType::from(ticket_type))
+    {
+        perms.get_mut(4).unwrap().deny = Permissions::SEND_MESSAGES;
+    }
 
     if information
         .guild
@@ -212,49 +262,49 @@ pub async fn create_ticket(
 
     let channel = information
         .guild
-        .create_channel(&ctx.http, |channel| {
-            channel
-                .category(ChannelId(category_id))
-                .name(format!(
-                    "{}-{}",
-                    &ticket_type.to_string(),
-                    information.author_name
-                ))
-                .permissions(perms)
-        })
+        .create_channel(
+            &ctx.http,
+            CreateChannel::new(format!(
+                "{}-{}",
+                &ticket_type.to_string(),
+                information.author_name
+            ))
+            .category(ChannelId::new(category_id))
+            .permissions(perms),
+        )
         .await
         .map_err(|_| "Unable to create the channel for the ticket".to_string())?;
 
+
+    let mut embeds = vec![ticket_type.get_embed()];
+    if information.questions.len() > 0 {
+        embeds.push(CreateEmbed::new().title("Submitted Answers").color(Color::RED)
+            .fields(
+                information.questions.iter().clone().map( |val|
+                    (&val.title, &val.answer, false)
+                )
+            ));
+    }
+
     channel
-        .send_message(&ctx.http, |message| {
-            let mut m = message
-                .content(format!("<@{}> <@&{}>", information.author_id, ticket_role))
-                .add_embed(|e| ticket_type.get_embed(e));
-            if information.questions.len() > 0 {
-                m = m.add_embed(|e| {
-                    information.questions.iter().clone().for_each(|val| {
-                        e.field(&val.title, &val.answer, false);
-                    });
-                    e.title("Submitted Answers").color(Color::RED)
-                });
-            }
-            m
-        })
+        .send_message(&ctx.http, CreateMessage::new()
+            .content(format!("<@{}> <@&{}>", information.author_id, ticket_role))
+            .embeds(embeds))
         .await
-        .map_err(|_| format!("Unable to make the message post in {}", channel.id.0))?;
-    Ok(channel.id.0.to_string())
+        .map_err(|_| format!("Unable to make the message post in {}", channel.id.get()))?;
+    Ok(channel.id.get().to_string())
 }
 
 pub async fn create_ticket_from_modal(
     ctx: &Context,
-    submission: &ModalSubmitInteraction,
+    submission: &ModalInteraction,
     ticket_type: TicketType,
 ) -> Result<String, String> {
     let author = submission.user.name.to_owned();
 
-    let author_id = submission.user.id.0;
+    let author_id = submission.user.id.get();
 
-    let guild_id = submission.guild_id.unwrap().0;
+    let guild_id = submission.guild_id.unwrap().get();
 
     let guild_id_interactive = submission
         .guild_id
@@ -266,7 +316,7 @@ pub async fn create_ticket_from_modal(
         f.components.iter().for_each(|g| match g {
             ActionRowComponent::InputText(z) => questions.push(Question {
                 title: get_question_from_id(z.custom_id.as_str()),
-                answer: z.value.to_string(),
+                answer: z.clone().value.unwrap().to_string(),
             }),
             ActionRowComponent::Button(_) => {}
             ActionRowComponent::SelectMenu(_) => {}
@@ -274,12 +324,19 @@ pub async fn create_ticket_from_modal(
         })
     });
 
+    if vec![TicketType::HbSpell, TicketType::HbOther, TicketType::HbItem, TicketType::HbFeat, TicketType::HbSubclass]
+        .contains(&ticket_type) &&
+        questions.clone().into_iter().filter(|x| Regex::new(r"https?://(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}(\.[a-z]{2,4})?\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)").unwrap().is_match(&x.answer)).count() == 0
+    {
+        Err("No valid URL found")?
+    }
+
     let data: TicketInformation = TicketInformation {
-        ticket_type: ticket_type,
+        ticket_type,
         author_name: author,
         author: submission.user.id,
-        author_id: author_id,
-        guild_id: guild_id,
+        author_id,
+        guild_id,
         guild: guild_id_interactive,
         questions: questions.clone(),
     };
@@ -289,25 +346,25 @@ pub async fn create_ticket_from_modal(
 
 pub async fn run(
     ctx: &Context,
-    command: &MessageComponentInteraction,
+    command: &ComponentInteraction,
     ticket_type: TicketType,
 ) -> Result<String, String> {
     let author = command.user.name.to_owned();
 
-    let author_id = command.user.id.0;
+    let author_id = command.user.id.get();
 
-    let guild_id = command.guild_id.unwrap().0;
+    let guild_id = command.guild_id.unwrap().get();
 
     let guild_id_interactive = command
         .guild_id
         .ok_or("Unable to retrieve the server from the bot".to_string())?;
 
     let data: TicketInformation = TicketInformation {
-        ticket_type: ticket_type,
+        ticket_type,
         author_name: author,
         author: command.user.id,
-        author_id: author_id,
-        guild_id: guild_id,
+        author_id,
+        guild_id,
         guild: guild_id_interactive,
         questions: Vec::new(),
     };

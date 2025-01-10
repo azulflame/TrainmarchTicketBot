@@ -1,30 +1,21 @@
-
 use std::{
+    collections::HashMap,
     fs::{self, File},
-    io::Write, collections::HashMap,
-};
-
-use chrono::{DateTime, NaiveDateTime, Utc};
-use serenity::{
-    builder::CreateApplicationCommand,
-    model::{
-        prelude::{
-            command::CommandOptionType,
-            interaction::application_command::ApplicationCommandInteraction, ChannelId, Embed,
-            Message, GuildId, Role, RoleId, GuildChannel
-        },
-        Permissions, user::User,
-    },
-    prelude::Context,
-    utils::Colour
+    io::Write,
 };
 
 use crate::config;
+use chrono::{DateTime, NaiveDateTime, Utc};
+use serenity::all::{
+    ChannelId, CommandInteraction, CommandOptionType, CreateAttachment, CreateMessage, Embed,
+    GetMessages, GuildChannel, GuildId, Message, Permissions, Role, RoleId, User,
+};
+use serenity::builder::{CreateCommand, CreateCommandOption};
+use serenity::model::Colour;
+use serenity::prelude::*;
 
-
-
-pub async fn run(ctx: &Context, command: &ApplicationCommandInteraction) -> Result<String, String> {
-    let author_id = &command.user.id.0;
+pub async fn run(ctx: &Context, command: &CommandInteraction) -> Result<String, String> {
+    let author_id = &command.user.id.get();
     // Verify the reason is a valid string
     let log_channel_id = config::get_config_val(config::SecretType::LogChannel)
         .parse::<u64>()
@@ -36,7 +27,7 @@ pub async fn run(ctx: &Context, command: &ApplicationCommandInteraction) -> Resu
         .channels(&ctx.http)
         .await
         .map_err(|_| "Unable to get the channels for the guild".to_string())?
-        .get(ChannelId(log_channel_id).as_ref())
+        .get(ChannelId::new(log_channel_id).as_ref())
         .ok_or("Unable to find the log channel".to_string())?
         .clone();
 
@@ -46,8 +37,7 @@ pub async fn run(ctx: &Context, command: &ApplicationCommandInteraction) -> Resu
         .get(0)
         .ok_or("Expected a closure message, but one was not found".to_string())?
         .value
-        .as_ref()
-        .and_then(|v| v.as_str())
+        .as_str()
         .ok_or("Expected a closure message, but one was not found".to_string())?;
 
     let channel = command
@@ -62,7 +52,7 @@ pub async fn run(ctx: &Context, command: &ApplicationCommandInteraction) -> Resu
     let category_id = &channel
         .parent_id
         .ok_or("Unable to get the Category for the provided Channel.".to_string())?
-        .0;
+        .get();
 
     let expected_category_id = config::get_config_val(config::SecretType::CategoryId)
         .parse::<u64>()
@@ -78,7 +68,7 @@ pub async fn run(ctx: &Context, command: &ApplicationCommandInteraction) -> Resu
 
     let messages = command
         .channel_id
-        .messages(&ctx.http, |retriever| retriever.limit(100))
+        .messages(&ctx.http, GetMessages::new().limit(100))
         .await
         .map_err(|_| {
             format!(
@@ -101,7 +91,7 @@ pub async fn run(ctx: &Context, command: &ApplicationCommandInteraction) -> Resu
     // Post the logs
 
     // Create the log first
-    let filename = format!("{}-{}.html", &deleted_channel, &channel.id.0).to_string();
+    let filename = format!("{}-{}.html", &deleted_channel, &channel.id.get()).to_string();
     let mut f =
         File::create(&filename).map_err(|_| "Error writing log file before upload".to_string())?;
     f.write_all(parse_logs(messages, &ctx).await.as_bytes())
@@ -109,13 +99,15 @@ pub async fn run(ctx: &Context, command: &ApplicationCommandInteraction) -> Resu
     f.flush()
         .map_err(|_| "Error writing log file before upload".to_string())?;
     log_channel
-        .send_message(&ctx.http, |f| {
-            f.content(format!(
-                "{} closed by <@{}> for reason \"{}\".",
-                deleted_channel, author_id, _reason
-            ))
-            .add_file(filename.as_str())
-        })
+        .send_message(
+            &ctx.http,
+            CreateMessage::new()
+                .content(format!(
+                    "{} closed by <@{}> for reason \"{}\".",
+                    deleted_channel, author_id, _reason
+                ))
+                .add_file(CreateAttachment::path(filename.as_str()).await.unwrap()),
+        )
         .await
         .map_err(|_| "Error posting log message to the log channel".to_string())?;
 
@@ -124,29 +116,35 @@ pub async fn run(ctx: &Context, command: &ApplicationCommandInteraction) -> Resu
     Ok(format!("Ticket {} closed.", &channel.name()))
 }
 
-pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {
-    command
-        .name("close")
+pub fn register() -> CreateCommand {
+    CreateCommand::new("close")
         .description("close a ticket!")
-        .create_option(|option| {
-            option
-            .name("reason")
-            .description("The reason for closing the ticket. Defaults to \"The ticket was closed and no reason was given.\"")
-            .kind(CommandOptionType::String)
-            .required(true)
-        })
+        .add_option(
+            CreateCommandOption::new(CommandOptionType::String, "reason", "The reason for closing the ticket. Defaults to \"The ticket was closed and no reason was given.\"")
+                .required(true)
+        )
         .default_member_permissions(Permissions::MANAGE_ROLES)
 }
 
 async fn parse_logs(inp: Vec<Message>, ctx: &Context) -> String {
-    let guild = GuildId(config::get_config_val(config::SecretType::GuildId).parse().unwrap());
-    let channels = guild.channels(&ctx.http).await.expect("Unable to fetch channels");
-    let role_list = guild.roles(&ctx.http).await.expect("Unable to retrieve roles");
+    let guild = GuildId::new(
+        config::get_config_val(config::SecretType::GuildId)
+            .parse()
+            .unwrap(),
+    );
+    let channels = guild
+        .channels(&ctx.http)
+        .await
+        .expect("Unable to fetch channels");
+    let role_list = guild
+        .roles(&ctx.http)
+        .await
+        .expect("Unable to retrieve roles");
     format!(
         "<!DOCTYPE html><html><head><script src=\"https://unpkg.com/wc-discord-message@^2.0.0/dist/wc-discord-message/wc-discord-message.js\"></script>
         </head><body><discord-messages>{}</discord-messages></body></html>",
         inp.iter()
-            .map(|f| 
+            .map(|f|
                format!(
                         "<discord-message author=\"{}\" avatar=\"{}\" {} {} timestamp=\"{}\">{}{}</discord-message>",
                         f.author.name,
@@ -162,7 +160,12 @@ async fn parse_logs(inp: Vec<Message>, ctx: &Context) -> String {
     )
 }
 
-fn format_embed(vec: &Vec<Embed>, roles: &HashMap<RoleId, Role>, channels: &HashMap<ChannelId, GuildChannel>,users: &Vec<User>) -> String {
+fn format_embed(
+    vec: &Vec<Embed>,
+    roles: &HashMap<RoleId, Role>,
+    channels: &HashMap<ChannelId, GuildChannel>,
+    users: &Vec<User>,
+) -> String {
     vec.iter()
         .map(|e| {
             format!(
@@ -188,16 +191,43 @@ fn format_embed(vec: &Vec<Embed>, roles: &HashMap<RoleId, Role>, channels: &Hash
         .fold("".to_string(), |a, b| format!("{}{}", a, b))
 }
 
-fn process_to_wc_discord_format(str: String, roles: &HashMap<RoleId, Role>, channels: &HashMap<ChannelId, GuildChannel>, users: &Vec<User>) -> String {
+fn process_to_wc_discord_format(
+    str: String,
+    roles: &HashMap<RoleId, Role>,
+    channels: &HashMap<ChannelId, GuildChannel>,
+    users: &Vec<User>,
+) -> String {
     let mut output = str.clone();
     for (role_id, role) in roles {
-        output = output.replace(format!("<@&{}>", role_id.0).as_str(), format!("<discord-mention type=\"role\" color=\"{}\">{}</discord-mention>", role.colour.hex(), role.name).as_str());
+        output = output.replace(
+            format!("<@&{}>", role_id).as_str(),
+            format!(
+                "<discord-mention type=\"role\" color=\"{}\">{}</discord-mention>",
+                role.colour.hex(),
+                role.name
+            )
+            .as_str(),
+        );
     }
     for (channel_id, channel) in channels {
-        output = output.replace(format!("<#{}>", channel_id.0).as_str(), format!("<discord-mention type=\"channel\">{}</discord-mention>", channel.name).as_str());
+        output = output.replace(
+            format!("<#{}>", channel_id).as_str(),
+            format!(
+                "<discord-mention type=\"channel\">{}</discord-mention>",
+                channel.name
+            )
+            .as_str(),
+        );
     }
     for user in users {
-        output = output.replace(format!("<@{}>", user.id.0).as_str(), format!("<discord-mention type=\"user\">{}</discord-mention>", user.name).as_str());
+        output = output.replace(
+            format!("<@{}>", user.id).as_str(),
+            format!(
+                "<discord-mention type=\"user\">{}</discord-mention>",
+                user.name
+            )
+            .as_str(),
+        );
     }
 
     output
