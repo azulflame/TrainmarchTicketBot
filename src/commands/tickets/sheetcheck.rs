@@ -1,7 +1,7 @@
-use rand::seq::SliceRandom;
-use serenity::{builder::CreateEmbed, model::prelude::component::InputTextStyle};
-
 use super::Questions;
+use rand::seq::SliceRandom;
+use serenity::all::InputTextStyle;
+use serenity::builder::CreateEmbed;
 const GSHEETS: &[&str] = &["https://docs.google.com/spreadsheets/d/1Yj-nmFw86gp2zh3cLqvJ5SEoBZ_hR7UJsSol2s2NdFk/edit?usp=drivesdk",
 "https://docs.google.com/spreadsheets/d/14MOQ-dtfVn5ua9z5ypfe0T1TnB-u-eitONIDwWhfW-c/edit?usp=drivesdk",
 "https://docs.google.com/spreadsheets/d/1zpHxzrpfX3wUbNr06fOkVyLbL6BAqX5lH-wDQAqLQfQ/edit?usp=drivesdk"];
@@ -16,8 +16,8 @@ const DICECLOUD: &[&str] = &[
     "https://v1.dicecloud.com/character/ZH5vi3n42DnzQP95R/-",
 ];
 
-pub fn embed(embed: &mut CreateEmbed) -> &mut CreateEmbed {
-    embed
+pub fn embed() -> CreateEmbed {
+    CreateEmbed::new()
         .title("Thanks for the Sheet Check Team Application")
         .field(
             "Sample Sheets",
@@ -88,8 +88,10 @@ impl Questions for SheetcheckQuestions {
         }
     }
 }
-pub fn get_questions() -> Vec<Box<dyn super::Questions + Send + Sync>> { vec![
-    Box::from(SheetcheckQuestions::Age),
-    Box::from(SheetcheckQuestions::ServerTime),
-    Box::from(SheetcheckQuestions::Why),
-]}
+pub fn get_questions() -> Vec<Box<dyn super::Questions + Send + Sync>> {
+    vec![
+        Box::from(SheetcheckQuestions::Age),
+        Box::from(SheetcheckQuestions::ServerTime),
+        Box::from(SheetcheckQuestions::Why),
+    ]
+}

@@ -1,9 +1,9 @@
-use serenity::{builder::CreateEmbed, model::prelude::component::InputTextStyle};
-
 use super::Questions;
+use serenity::all::InputTextStyle;
+use serenity::builder::CreateEmbed;
 
-pub fn embed(embed: &mut CreateEmbed) -> &mut CreateEmbed {
-    embed.title("Thanks for your Homebrew Team Application!").field(
+pub fn embed() -> CreateEmbed {
+    CreateEmbed::new().title("Thanks for your Homebrew Team Application!").field(
         "Your application has been created!",
         "The Head of Homebrew will review this, and may have further questions for you.",
         false,
@@ -24,7 +24,7 @@ impl Questions for HomebrewQuestions {
             HomebrewQuestions::Balance => "How do you determine homebrew balance?",
             HomebrewQuestions::Why => "Why do you want to review homebrew?",
             HomebrewQuestions::Time => "How long have you been on the server?",
-            HomebrewQuestions::Experience => "Create a balanced item for each rarity."
+            HomebrewQuestions::Experience => "Create a balanced item for each rarity.",
         }
     }
     fn get_id(&self) -> &str {
@@ -32,7 +32,7 @@ impl Questions for HomebrewQuestions {
             HomebrewQuestions::Balance => "homebrew_modal_balance",
             HomebrewQuestions::Why => "homebrew_modal_why",
             HomebrewQuestions::Experience => "homebrew_modal_experience",
-            HomebrewQuestions::Time => "homebrew_modal_time"
+            HomebrewQuestions::Time => "homebrew_modal_time",
         }
     }
     fn required(&self) -> bool {
@@ -52,11 +52,11 @@ impl Questions for HomebrewQuestions {
         }
     }
 }
-pub fn get_questions() -> Vec<Box<dyn super::Questions + Send + Sync>> { vec![
-    Box::from(HomebrewQuestions::Why),
-    Box::from(HomebrewQuestions::Experience),
-    Box::from(HomebrewQuestions::Balance),
-    Box::from(HomebrewQuestions::Time),
-]
+pub fn get_questions() -> Vec<Box<dyn super::Questions + Send + Sync>> {
+    vec![
+        Box::from(HomebrewQuestions::Why),
+        Box::from(HomebrewQuestions::Experience),
+        Box::from(HomebrewQuestions::Balance),
+        Box::from(HomebrewQuestions::Time),
+    ]
 }
-
