@@ -9,7 +9,7 @@ pub fn register() -> CreateCommand {
                 .required(true)
         )
         .add_option(CreateCommandOption::new(CommandOptionType::String, "reason", "Why the approval state is what it is (If denied, this is why)")
-            .required(true))
+            .required(true).max_length(1000))
         .add_option(CreateCommandOption::new(CommandOptionType::User, "submitter", "The original submitter")
             .required(true))
         .add_option(CreateCommandOption::new(CommandOptionType::String, "link", "The link to the homebrew")
