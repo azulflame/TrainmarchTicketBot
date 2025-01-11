@@ -22,11 +22,13 @@ pub enum SecretType {
     Staff,
     Lore,
     Dm,
+    HomebrewLogChannel,
 }
 
 impl SecretType {
     fn to_string(&self) -> String {
         match self {
+            SecretType::HomebrewLogChannel => "HB_LOG_CHANNEL",
             SecretType::HomebrewCategoryId => "HB_CATEGORY_ID",
             SecretType::HomebrewSubmission => "HB_REVIEW_ROLE",
             SecretType::DiscordToken => "DISCORD_TOKEN",

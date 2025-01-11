@@ -14,6 +14,7 @@ struct Handler;
 enum CommandType {
     CreateTicket,
     Close,
+    HomebrewClose,
 }
 impl FromStr for CommandType {
     type Err = ();
@@ -21,6 +22,7 @@ impl FromStr for CommandType {
         match input {
             "close" => Ok(CommandType::Close),
             "create-ticket-posts" => Ok(CommandType::CreateTicket),
+            "homebrew-close" => Ok(CommandType::HomebrewClose),
             _ => Err(()),
         }
     }
@@ -38,7 +40,8 @@ impl EventHandler for Handler {
         let _commands = guild_id
             .set_commands(&ctx.http, vec![
                 commands::close::register(),
-                commands::create_ticket_embeds::register()
+                commands::create_ticket_embeds::register(),
+                commands::close_homebrew::register(),
             ]
             )
             .await
@@ -109,7 +112,8 @@ impl EventHandler for Handler {
                     CommandType::Close => commands::close::run(&ctx, &command).await,
                     CommandType::CreateTicket => {
                         commands::create_ticket_embeds::run(&ctx, &command).await
-                    }
+                    },
+                    CommandType::HomebrewClose => {commands::close_homebrew::run(&ctx, &command).await},
                 };
 
                 let _x = match response {

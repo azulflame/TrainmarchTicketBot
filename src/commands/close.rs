@@ -58,11 +58,7 @@ pub async fn run(ctx: &Context, command: &CommandInteraction) -> Result<String, 
         .parse::<u64>()
         .map_err(|_| "Unable to parse the category ID into an u64".to_string())?;
 
-    let homebrew_category_id = config::get_config_val(config::SecretType::HomebrewCategoryId)
-        .parse::<u64>()
-        .map_err(|_| "Unable to parse the category ID into an u64".to_string())?;
-
-    if *category_id != expected_category_id  && *category_id != homebrew_category_id{
+    if *category_id != expected_category_id {
         return Err("This is not a ticket channel.".to_string());
     }
 
