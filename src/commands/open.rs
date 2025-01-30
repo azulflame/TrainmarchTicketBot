@@ -234,12 +234,6 @@ pub async fn create_ticket(
             kind: PermissionOverwriteType::Member(information.author),
         },
     ];
-    if vec![TicketType::HbFeat, TicketType::HbItem, TicketType::HbSpell, TicketType::HbOther, TicketType::HbSubclass]
-        .contains(&TicketType::from(ticket_type))
-    {
-        perms.get_mut(4).unwrap().allow = Permissions::empty();
-        perms.get_mut(4).unwrap().deny = Permissions::VIEW_CHANNEL;
-    }
 
     if information
         .guild

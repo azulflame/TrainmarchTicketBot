@@ -3,7 +3,7 @@ use std::{
     fs::{self, File},
     io::Write,
 };
-
+use std::collections::BTreeMap;
 use crate::config;
 use chrono::{DateTime, NaiveDateTime, Utc};
 use serenity::all::{
@@ -66,18 +66,7 @@ pub async fn run(ctx: &Context, command: &CommandInteraction) -> Result<String, 
 
     // pull logs
 
-    let messages = command
-        .channel_id
-        .messages(&ctx.http, GetMessages::new().limit(100))
-        .await
-        .map_err(|_| {
-            format!(
-                "Unable to get the logs for the channel <#{}>",
-                channel.name()
-            )
-        })?;
-
-    // Delete the channel
+    let messages = get_messages(&channel, &ctx).await?;
 
     let deleted_channel = &command
         .channel_id
@@ -126,7 +115,7 @@ pub fn register() -> CreateCommand {
         .default_member_permissions(Permissions::MANAGE_ROLES)
 }
 
-async fn parse_logs(inp: Vec<Message>, ctx: &Context) -> String {
+pub async fn parse_logs(inp: Vec<Message>, ctx: &Context) -> String {
     let guild = GuildId::new(
         config::get_config_val(config::SecretType::GuildId)
             .parse()
@@ -160,7 +149,7 @@ async fn parse_logs(inp: Vec<Message>, ctx: &Context) -> String {
     )
 }
 
-fn format_embed(
+pub fn format_embed(
     vec: &Vec<Embed>,
     roles: &HashMap<RoleId, Role>,
     channels: &HashMap<ChannelId, GuildChannel>,
@@ -191,7 +180,7 @@ fn format_embed(
         .fold("".to_string(), |a, b| format!("{}{}", a, b))
 }
 
-fn process_to_wc_discord_format(
+pub fn process_to_wc_discord_format(
     str: String,
     roles: &HashMap<RoleId, Role>,
     channels: &HashMap<ChannelId, GuildChannel>,
@@ -231,4 +220,36 @@ fn process_to_wc_discord_format(
     }
 
     output
+}
+
+pub async fn get_messages(
+    channel: &GuildChannel,
+    ctx: &Context
+) -> Result<Vec<Message>, String> {
+    let mut map: BTreeMap<u64, Message> = BTreeMap::new();
+    let mut count: i64 = -1;
+
+    while count < map.keys().len() as i64 {
+        count = map.len() as i64;
+        let messages =
+        channel.messages(
+            &ctx.http,
+
+            match map.clone().first_entry() {
+            Some(x) => {
+                GetMessages::new().before(*x.key()).limit(100)
+            },
+            None => {
+               GetMessages::new().limit(100)
+            }
+        }).await.map_err(|_| format!(
+            "Unable to get the logs for the channel <#{}>",
+            channel.name()
+        ))?;
+        for x in messages {
+            map.insert(x.id.get(), x.clone());
+        }
+    }
+
+    Ok(map.iter().map(|(_, v)| v.clone()).collect::<Vec<Message>>())
 }
