@@ -24,32 +24,32 @@ pub fn embed() -> CreateEmbed {
             "Please do your best to find the problems with these sample sheets, and the Head of Player Affairs will get to you when you finish.",
             false,
         )
-        .field(
-            "Sheet 1",
-            GSHEETS
-                .choose(&mut rand::thread_rng())
-                .as_ref()
-                .unwrap()
-                .to_string(),
-            false,
-        )
-        .field(
-            "Sheet 2",
-            DDB.choose(&mut rand::thread_rng())
-                .as_ref()
-                .unwrap()
-                .to_string(),
-            false,
-        )
-        .field(
-            "Sheet 3",
-            DICECLOUD
-                .choose(&mut rand::thread_rng())
-                .as_ref()
-                .unwrap()
-                .to_string(),
-            false,
-        )
+        // .field(
+        //     "Sheet 1",
+        //     GSHEETS
+        //         .choose(&mut rand::thread_rng())
+        //         .as_ref()
+        //         .unwrap()
+        //         .to_string(),
+        //     false,
+        // )
+        // .field(
+        //     "Sheet 2",
+        //     DDB.choose(&mut rand::thread_rng())
+        //         .as_ref()
+        //         .unwrap()
+        //         .to_string(),
+        //     false,
+        // )
+        // .field(
+        //     "Sheet 3",
+        //     DICECLOUD
+        //         .choose(&mut rand::thread_rng())
+        //         .as_ref()
+        //         .unwrap()
+        //         .to_string(),
+        //     false,
+        // )
 }
 #[derive(Clone, Copy)]
 pub enum SheetcheckQuestions {

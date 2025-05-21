@@ -1,11 +1,5 @@
-use std::{collections::BTreeMap, sync::Once};
-
-use shuttle_runtime::SecretStore;
-
+use dotenv::dotenv;
 use crate::commands::open::TicketType;
-
-static mut CONFIG: Option<SecretStore> = None;
-static INIT_CONFIG: Once = Once::new();
 
 pub enum SecretType {
     HomebrewCategoryId,
@@ -65,24 +59,9 @@ impl From<TicketType> for SecretType {
         }
     }
 }
-
-pub fn load_config(ss: SecretStore) {
-    unsafe {
-        INIT_CONFIG.call_once(|| {
-            CONFIG = Some(ss.clone());
-        })
-    }
+pub fn load_config() {
+    dotenv().ok();
 }
-
 pub fn get_config_val(secret_type: SecretType) -> String {
-    unsafe {
-        INIT_CONFIG.call_once(|| {
-            CONFIG = Some(SecretStore::new(BTreeMap::new()));
-        });
-        CONFIG
-            .as_ref()
-            .unwrap()
-            .get(secret_type.to_string().as_str())
-            .unwrap()
-    }
+    std::env::var(secret_type.to_string()).expect(format!("secret type {} not set", secret_type.to_string()).as_str())
 }

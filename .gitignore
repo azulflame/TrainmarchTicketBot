@@ -1,9 +1,9 @@
 /target
-Secrets.toml
-Secrets.dev.toml
+prod.env
+dev.env
 ~
 .gitignore.shuttle*
-Secrets*.toml
+prod.env
 
 .idea
 .shuttle

@@ -5,7 +5,6 @@ use commands::open::TicketType;
 use serenity::all::{CreateInteractionResponse, CreateInteractionResponseFollowup, GuildId, Interaction, Ready};
 use serenity::prelude::*;
 use serenity::{async_trait, Client};
-use shuttle_runtime::SecretStore;
 use std::error::Error;
 use std::str::FromStr;
 use crate::commands::open::open_modal;
@@ -161,15 +160,15 @@ impl EventHandler for Handler {
     }
 }
 
-#[shuttle_runtime::main]
-async fn serenity(
-    #[shuttle_runtime::Secrets] secrets: SecretStore,
-) -> shuttle_serenity::ShuttleSerenity {
-    config::load_config(secrets);
+#[tokio::main]
+async fn main() {
+    config::load_config();
     let token = config::get_config_val(config::SecretType::DiscordToken);
-    let client = Client::builder(token, GatewayIntents::MESSAGE_CONTENT)
+    let mut client = Client::builder(token, GatewayIntents::MESSAGE_CONTENT)
         .event_handler(Handler)
         .await
         .expect("Error creating client");
-    Ok(client.into())
+    if let Err(why) = client.start().await {
+        println!("Client error: {why:?}");
+    }
 }
